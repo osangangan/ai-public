@@ -1,0 +1,96 @@
+{
+  "project": "A Safe Passage",
+  "version": "1.2.0",
+  "last_updated": "2026-08-24",
+  "philosophical_framing": {
+    "traditions": ["Édouard Glissant (Poetics of Relation)", "Achille Mbembe (Afropolitanism)", "Frantz Fanon (Decolonial Solidarity)"],
+    "core_premise": "Borders are historical, colonial, and political constructs. The failure to build continental free movement is political and bureaucratic, not imaginative. Treaties are secondary perishable firmware; human and ecological movement is primary reality."
+  },
+  "treaty_corpus": {
+    "ecowas": {
+      "name": "Economic Community of West African States",
+      "treaty_year": 1975,
+      "free_movement_protocol": "1979 Protocol on Free Movement of Persons, Right of Residence and Establishment (A/P.1/5/79)",
+      "phases": {
+        "phase_1_entry": "Article 2: Right of entry without visa for all ECOWAS citizens for up to 90 days with valid travel document and international health certificate (Yellow Fever).",
+        "phase_2_residence": "Right of residence for citizens to seek and take up employment (enacted 1986).",
+        "phase_3_establishment": "Right to establish enterprise and carry out commercial activities (enacted 1990)."
+      },
+      "trade_scheme": "ECOWAS Trade Liberalization Scheme (ETLS): 0% customs tariff on unprocessed agricultural produce and local artisanal handicrafts.",
+      "known_bureaucratic_friction": "Informal checkpoint extortion, arbitrary demands for extra-legal 'entry stamps', non-recognition of national ID cards by local officers."
+    },
+    "african_union": {
+      "name": "African Union (AU)",
+      "protocol_free_movement": "AU Protocol to the Treaty Establishing the African Economic Community Relating to Free Movement of Persons, Right of Residence and Right of Establishment (2018)",
+      "articles": {
+        "article_3_principles": "Free movement of persons, right of residence, and right of establishment across all AU member states without discrimination.",
+        "article_5_entry": "Progressive abolition of visa requirements; 90-day visa-free entry.",
+        "article_10_african_passport": "Issuance of the official African Union Passport to facilitate unhindered continental travel."
+      },
+      "afcfta": "African Continental Free Trade Area (2018): Elimination of 90% of tariffs on intra-African goods, simplified trade regime for small cross-border traders.",
+      "bamako_convention": "Bamako Convention (1991/1998): Absolute prohibition of import into Africa of hazardous, toxic, radioactive, or e-waste."
+    },
+    "aes": {
+      "name": "Alliance of Sahel States (L'Alliance des États du Sahel - Burkina Faso, Mali, Niger)",
+      "founding_charter": "Liptako-Gourma Charter (September 2023)",
+      "consolidation_texts": "AES Confederation Declarations & Directives (2024–2026)",
+      "mobility_directives": {
+        "aes_unified_passport": "Biometric, unified AES Confederation Passport ensuring unrestricted, visa-free passage across Mali, Burkina Faso, and Niger.",
+        "free_movement_zone": "Sovereign Sahelian mobility corridor prioritizing regional security, shared customs tariffs, and mutual recognition of civil status."
+      },
+      "transition_status": "Withdrawal from ECOWAS effective January 2025; transitional reciprocal entry for neighboring West African citizens under ongoing bilateral management."
+    }
+  },
+  "empirical_sensing_telemetry": {
+    "corridors": [
+      {
+        "corridor_id": "SEME_KRAKE",
+        "name": "Seme-Krake Border (Nigeria / Benin)",
+        "coordinates": {"lat": 6.381, "lng": 2.716},
+        "sentinel_1_sar": {
+          "sensor": "Copernicus Sentinel-1 Synthetic Aperture Radar (C-band SAR)",
+          "typical_backscatter_anomaly": "High metallic surface reflection (gamma-0 > -5 dB)",
+          "observed_freight_queue_length": "1.8 km to 3.2 km stationary haulage queue along Lagos-Badagry-Cotonou expressway",
+          "empirical_diagnosis": "Severe physical customs bottlenecking contradicting ETLS priority clearance."
+        },
+        "opencellid_rf_bleed": {
+          "signal_overlap_radius": "18.5 km",
+          "observed_carriers": ["MTN Nigeria (621-30)", "Moov Africa Benin (616-01)", "MTN Benin (616-02)"],
+          "empirical_proof": "Electromagnetic data naturally crosses border without passport or checkpoint friction."
+        }
+      },
+      {
+        "corridor_id": "MALANVILLE_GAYA",
+        "name": "Malanville-Gaya Border (Benin / Niger / AES Corridor)",
+        "coordinates": {"lat": 11.868, "lng": 3.386},
+        "sentinel_1_sar": {
+          "sensor": "Copernicus Sentinel-1 SAR",
+          "typical_backscatter_anomaly": "High radar reflectance across Niger River bridge crossing",
+          "observed_freight_queue_length": "2.4 km to 4.1 km grain and livestock transit trucks",
+          "empirical_diagnosis": "Post-ECOWAS sanctions/AES transition created transit checkpoints on grain transport."
+        },
+        "opencellid_rf_bleed": {
+          "signal_overlap_radius": "22.0 km",
+          "observed_carriers": ["Moov Africa Benin (616-01)", "Airtel Niger (614-02)", "Zamani Telecom (614-01)"],
+          "empirical_proof": "Border communities communicate across river using overlapping telecom frequencies."
+        }
+      },
+      {
+        "corridor_id": "PAGA_DAKOLA",
+        "name": "Paga-Dakola Border (Ghana / Burkina Faso)",
+        "coordinates": {"lat": 10.998, "lng": -1.076},
+        "sentinel_1_sar": {
+          "sensor": "Copernicus Sentinel-1 SAR",
+          "typical_backscatter_anomaly": "Linear metallic backscatter array on N10 / RN5 highway",
+          "observed_freight_queue_length": "1.2 km container freight queue moving north toward Ouagadougou",
+          "empirical_diagnosis": "Transit customs escrow delays for goods arriving from Tema/Takoradi ports."
+        },
+        "opencellid_rf_bleed": {
+          "signal_overlap_radius": "16.0 km",
+          "observed_carriers": ["MTN Ghana (620-01)", "Orange Burkina Faso (613-02)", "Moov Africa Burkina (613-01)"],
+          "empirical_proof": "Cross-border market transactions switch networks smoothly across the frontier."
+        }
+      }
+    ]
+  }
+}
