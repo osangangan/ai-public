@@ -64,5 +64,5 @@ GEMINI_API_KEY=your_google_gemini_api_key_here
 ---
 
 ## Authors & Credits
-- **2001 Collective**: Iretomiwa Sharon Omodeinde & Ayomide Daniel Atobatele
+- **2001 Collective**: Iretomiwa Sharon Omodeinde
 - Developed for **Dreaming New Worlds (DNW) 2026**
