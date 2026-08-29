@@ -1,96 +1,83 @@
 {
   "project": "A Safe Passage",
-  "version": "1.2.0",
-  "last_updated": "2026-08-24",
-  "philosophical_framing": {
-    "traditions": ["Édouard Glissant (Poetics of Relation)", "Achille Mbembe (Afropolitanism)", "Frantz Fanon (Decolonial Solidarity)"],
-    "core_premise": "Borders are historical, colonial, and political constructs. The failure to build continental free movement is political and bureaucratic, not imaginative. Treaties are secondary perishable firmware; human and ecological movement is primary reality."
-  },
+  "version": "2.2.0",
+  "last_updated": "2026-08-25",
+  "core_premise": "Borders are political and administrative constructs. The failure to build continental free movement is bureaucratic, not imaginative. Treaties are secondary instruments; lived human movement, trade, kinship, and data circulation are the primary reality. Post-nationality is an exit from the nation-first framework and an embrace of a human-first framework; that is, that we and the people we encounter are more than just nationals.",
   "treaty_corpus": {
-    "ecowas": {
-      "name": "Economic Community of West African States",
+    "west_africa_ecowas": {
+      "bloc_name": "Economic Community of West African States (ECOWAS)",
       "treaty_year": 1975,
       "free_movement_protocol": "1979 Protocol on Free Movement of Persons, Right of Residence and Establishment (A/P.1/5/79)",
-      "phases": {
-        "phase_1_entry": "Article 2: Right of entry without visa for all ECOWAS citizens for up to 90 days with valid travel document and international health certificate (Yellow Fever).",
-        "phase_2_residence": "Right of residence for citizens to seek and take up employment (enacted 1986).",
-        "phase_3_establishment": "Right to establish enterprise and carry out commercial activities (enacted 1990)."
+      "provisions": {
+        "visa_free_entry": "Article 2: Right of entry without visa for all ECOWAS citizens for up to 90 days with valid national ID/passport and international health certificate.",
+        "trade_and_objects": "ECOWAS Trade Liberalization Scheme (ETLS): 0% customs tariffs on unprocessed agricultural produce, local artisanal goods, and certified regional manufactures.",
+        "residence_and_establishment": "Protocols enacted in 1986 and 1990 guaranteeing the right to reside and establish businesses."
       },
-      "trade_scheme": "ECOWAS Trade Liberalization Scheme (ETLS): 0% customs tariff on unprocessed agricultural produce and local artisanal handicrafts.",
-      "known_bureaucratic_friction": "Informal checkpoint extortion, arbitrary demands for extra-legal 'entry stamps', non-recognition of national ID cards by local officers."
+      "known_friction": "Extortion at informal checkpoints, arbitrary transit levies on goods, non-recognition of national identity cards."
     },
-    "african_union": {
-      "name": "African Union (AU)",
-      "protocol_free_movement": "AU Protocol to the Treaty Establishing the African Economic Community Relating to Free Movement of Persons, Right of Residence and Right of Establishment (2018)",
-      "articles": {
-        "article_3_principles": "Free movement of persons, right of residence, and right of establishment across all AU member states without discrimination.",
-        "article_5_entry": "Progressive abolition of visa requirements; 90-day visa-free entry.",
-        "article_10_african_passport": "Issuance of the official African Union Passport to facilitate unhindered continental travel."
+    "sahel_aes": {
+      "bloc_name": "Alliance of Sahel States (Alliance des États du Sahel - Burkina Faso, Mali, Niger)",
+      "founding_charter": "Liptako-Gourma Charter (September 2023) & Confederation Treaties (2024–2026)",
+      "provisions": {
+        "biometric_passport": "Unified AES Confederation Biometric Passport guaranteeing visa-free internal circulation.",
+        "security_and_mobility_corridor": "Shared customs, harmonized civil status recognition, and sovereign transit corridors."
       },
-      "afcfta": "African Continental Free Trade Area (2018): Elimination of 90% of tariffs on intra-African goods, simplified trade regime for small cross-border traders.",
-      "bamako_convention": "Bamako Convention (1991/1998): Absolute prohibition of import into Africa of hazardous, toxic, radioactive, or e-waste."
+      "transition_status": "Reciprocal bilateral transit arrangements with neighboring coastal West African nations."
     },
-    "aes": {
-      "name": "Alliance of Sahel States (L'Alliance des États du Sahel - Burkina Faso, Mali, Niger)",
-      "founding_charter": "Liptako-Gourma Charter (September 2023)",
-      "consolidation_texts": "AES Confederation Declarations & Directives (2024–2026)",
-      "mobility_directives": {
-        "aes_unified_passport": "Biometric, unified AES Confederation Passport ensuring unrestricted, visa-free passage across Mali, Burkina Faso, and Niger.",
-        "free_movement_zone": "Sovereign Sahelian mobility corridor prioritizing regional security, shared customs tariffs, and mutual recognition of civil status."
-      },
-      "transition_status": "Withdrawal from ECOWAS effective January 2025; transitional reciprocal entry for neighboring West African citizens under ongoing bilateral management."
-    }
-  },
-  "empirical_sensing_telemetry": {
-    "corridors": [
-      {
-        "corridor_id": "SEME_KRAKE",
-        "name": "Seme-Krake Border (Nigeria / Benin)",
-        "coordinates": {"lat": 6.381, "lng": 2.716},
-        "sentinel_1_sar": {
-          "sensor": "Copernicus Sentinel-1 Synthetic Aperture Radar (C-band SAR)",
-          "typical_backscatter_anomaly": "High metallic surface reflection (gamma-0 > -5 dB)",
-          "observed_freight_queue_length": "1.8 km to 3.2 km stationary haulage queue along Lagos-Badagry-Cotonou expressway",
-          "empirical_diagnosis": "Severe physical customs bottlenecking contradicting ETLS priority clearance."
-        },
-        "opencellid_rf_bleed": {
-          "signal_overlap_radius": "18.5 km",
-          "observed_carriers": ["MTN Nigeria (621-30)", "Moov Africa Benin (616-01)", "MTN Benin (616-02)"],
-          "empirical_proof": "Electromagnetic data naturally crosses border without passport or checkpoint friction."
-        }
-      },
-      {
-        "corridor_id": "MALANVILLE_GAYA",
-        "name": "Malanville-Gaya Border (Benin / Niger / AES Corridor)",
-        "coordinates": {"lat": 11.868, "lng": 3.386},
-        "sentinel_1_sar": {
-          "sensor": "Copernicus Sentinel-1 SAR",
-          "typical_backscatter_anomaly": "High radar reflectance across Niger River bridge crossing",
-          "observed_freight_queue_length": "2.4 km to 4.1 km grain and livestock transit trucks",
-          "empirical_diagnosis": "Post-ECOWAS sanctions/AES transition created transit checkpoints on grain transport."
-        },
-        "opencellid_rf_bleed": {
-          "signal_overlap_radius": "22.0 km",
-          "observed_carriers": ["Moov Africa Benin (616-01)", "Airtel Niger (614-02)", "Zamani Telecom (614-01)"],
-          "empirical_proof": "Border communities communicate across river using overlapping telecom frequencies."
-        }
-      },
-      {
-        "corridor_id": "PAGA_DAKOLA",
-        "name": "Paga-Dakola Border (Ghana / Burkina Faso)",
-        "coordinates": {"lat": 10.998, "lng": -1.076},
-        "sentinel_1_sar": {
-          "sensor": "Copernicus Sentinel-1 SAR",
-          "typical_backscatter_anomaly": "Linear metallic backscatter array on N10 / RN5 highway",
-          "observed_freight_queue_length": "1.2 km container freight queue moving north toward Ouagadougou",
-          "empirical_diagnosis": "Transit customs escrow delays for goods arriving from Tema/Takoradi ports."
-        },
-        "opencellid_rf_bleed": {
-          "signal_overlap_radius": "16.0 km",
-          "observed_carriers": ["MTN Ghana (620-01)", "Orange Burkina Faso (613-02)", "Moov Africa Burkina (613-01)"],
-          "empirical_proof": "Cross-border market transactions switch networks smoothly across the frontier."
-        }
+    "east_africa_eac": {
+      "bloc_name": "East African Community (EAC - Kenya, Uganda, Rwanda, Tanzania, Burundi, South Sudan, DRC, Somalia)",
+      "founding_treaty": "Treaty for the Establishment of the East African Community (1999) & Common Market Protocol (2010)",
+      "provisions": {
+        "free_movement_of_persons": "EAC Common Market Protocol: Freedom of movement for persons, labor, goods, services, and capital.",
+        "national_id_travel": "Citizens of Kenya, Uganda, and Rwanda can cross shared frontiers using only their National Identity Cards (no passport required).",
+        "single_tourist_visa": "East Africa Tourist Visa: single multi-entry visa covering Kenya, Uganda, and Rwanda.",
+        "digital_and_data_circulation": "EAC One Network Area (ONA): Harmonized telecommunications framework capping wholesale/retail roaming tariffs and eliminating incoming call surcharges across Kenya, Uganda, Rwanda, South Sudan, and Tanzania.",
+        "one_stop_border_posts": "Operationalized One Stop Border Posts (OSBPs) like Busia, Malaba, and Namanga to combine exit/entry formalities into a single inspection."
       }
-    ]
+    },
+    "southern_africa_sadc": {
+      "bloc_name": "Southern African Development Community (SADC)",
+      "founding_treaty": "SADC Treaty (1992) & Protocol on the Facilitation of Movement of Persons (2005)",
+      "provisions": {
+        "movement_framework": "2005 Protocol aims for progressive visa-free entry, residence, and establishment (supported through progressive bilateral visa waivers across member states).",
+        "simplified_trade_regime": "SADC Simplified Trade Regime (STR): Streamlined clearance and zero-duty thresholds for small-scale cross-border traders carrying goods under $1,000 (e.g. Malawi-Mozambique, Zambia-Zimbabwe).",
+        "digital_roaming_initiatives": "SADC One Network Area (ONA) & SADC Home Roaming flat tariffs (implemented between Botswana, Namibia, Malawi, Mozambique, Zambia, and Zimbabwe reducing roaming data and voice costs)."
+      }
+    },
+    "eastern_and_southern_africa_comesa": {
+      "bloc_name": "Common Market for Eastern and Southern Africa (COMESA - 21 Member States)",
+      "founding_treaty": "COMESA Treaty (1994)",
+      "provisions": {
+        "vehicular_and_object_circulation": "COMESA Yellow Card: Regional third-party motor vehicle insurance operational across 13+ nations, allowing commercial and private vehicles to cross multiple borders with a single insurance certificate.",
+        "simplified_trade_regime": "COMESA Simplified Trade Regime (STR): Duty-free crossing for cross-border traders carrying designated local goods up to $2,000 with simplified customs documentation.",
+        "free_movement_protocols": "1984 Visa Relaxation Protocol and 1998 Protocol on Free Movement of Persons."
+      }
+    },
+    "central_africa_cemac": {
+      "bloc_name": "Central African Economic and Monetary Community (CEMAC - Cameroon, Gabon, Chad, CAR, Equatorial Guinea, Republic of Congo)",
+      "provisions": {
+        "free_movement_act": "2013/2017 Free Movement Directives: Visa exemption for all CEMAC citizens holding biometric CEMAC passports traveling within the 6 member states.",
+        "transit_corridors": "Douala-N'Djamena and Douala-Bangui trade and logistics corridors."
+      },
+      "known_friction": "Frequent informal road checks and administrative delays along regional transit axes."
+    },
+    "continental_au_and_digital": {
+      "bloc_name": "African Union (AU) & Continental Frameworks",
+      "treaties": {
+        "au_free_movement_protocol": "AU Protocol on Free Movement of Persons, Right of Residence and Establishment (2018) & African Union Passport.",
+        "afcfta": "African Continental Free Trade Area (AfCFTA): Comprehensive reduction of 90% of tariffs and continental digital trade protocols.",
+        "saatm": "Single African Air Transport Market (SAATM): Continental open skies initiative to eliminate bilateral airline restrictions.",
+        "digital_data_and_roaming": "Smart Africa Alliance 'One Africa Network' (OAN) & AU Malabo Convention (2014) on Cybersecurity and Personal Data Protection."
+      }
+    },
+    "intellectual_property_and_creative_circulation": {
+      "bloc_name": "African Intellectual Property & Creative Asset Circulation Architecture",
+      "regimes": {
+        "aripo": "African Regional Intellectual Property Organization (Harare & Banjul Protocols - 22 predominantly Anglophone states): Centralized patent and trademark filing.",
+        "oapi": "Organisation Africaine de la Propriété Intellectuelle (Bangui Agreement - 17 Francophone states): Unitary IP system where registration automatically covers all member nations.",
+        "standalone_powerhouses_nigeria": "Key creative and tech powerhouses like Nigeria, South Africa, and Ethiopia are members of neither ARIPO nor OAPI. Nigeria operates its own domestic Trademarks, Patents and Designs Registry, which historically faced backlogs and non-automated registries.",
+        "afcfta_ipr_protocol": "AfCFTA Protocol on Intellectual Property Rights (IPR): Legally binding on all State Parties to protect continental creative, agricultural, and technological assets. However, because IP is territorial, countries lacking automated domestic registers face a major disconnect between continental treaty law and real-world enforcement."
+      }
+    }
   }
 }

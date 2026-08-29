@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "project": "A Safe Passage / ai-public",
+  "last_updated": "2026-08-25",
+  "description": "This file contains the core solution-oriented pathways, models, and paradigms developed for A Safe Passage. The conversational engine reads these seeds directly to guide deliberations, generate citizen-level protocols, and offer constructive ways of seeing and doing.",
+  "core_philosophy": {
+    "post_nationality": "An exit from the nation-first framework and an embrace of a human-first framework; that is, that we and the people we encounter are more than just nationals.",
+    "seeing_the_human_in_the_border": "Recognising that behind every bureaucratic checkpoint friction is a human being operating under administrative constraints they did not author, and behind every moment of cross-border hospitality is living proof of human solidarity that already exceeds state borders."
+  },
+  "solution_pathways": [
+    {
+      "id": "pathway_1_informal_intelligence_as_infrastructure",
+      "category": "Community Infrastructure",
+      "title": "Legitimizing Informal Cross-Border Intelligence",
+      "core_idea": "Much of what already works across African frontiers is informal community infrastructure: shared driver networks, market women's word-of-mouth regarding checkpoint conditions, and mutual aid across border towns. Rather than criminalizing or ignoring this knowledge, safe passage requires recognizing community intelligence as real, functioning public infrastructure."
+    },
+    {
+      "id": "pathway_2_digital_roaming_democratization",
+      "category": "Digital & Data Circulation",
+      "title": "Ending the Digital Frontier Tax",
+      "core_idea": "Exorbitant mobile data roaming is a digital border tax that penalizes mobility. Regional frameworks like the EAC One Network Area (ONA) and SADC roaming pacts prove that flat-rate, local-cost cross-border data is technically and economically viable. Digital connectivity must be treated as a fundamental right of mobility, ensuring travelers never lose navigation, communication, or payment capability at the frontier."
+    },
+    {
+      "id": "pathway_3_activation_over_amendment",
+      "category": "Legal & Policy Action",
+      "title": "Enforcing What Is Already Codified (Activation Protocols)",
+      "core_idea": "The majority of border delays and extortions are not due to an absence of law, but an absence of activation. Treaties (ECOWAS 1979, EAC 2010 Common Market, AfCFTA, AU 2018) already guarantee visa-free entry and 0% tariffs on local goods. The citizen solution lies in making these rights legible to everyday travelers through simple, non-legalistic language and collective transparency tools."
+    },
+    {
+      "id": "pathway_4_simplified_trade_regimes",
+      "category": "Objects & Goods",
+      "title": "Frictionless Passage for Small-Scale Traders and Artisans",
+      "core_idea": "Small-scale traders, agriculturalists, and cultural producers carry the lifeblood of regional economies. Mechanisms like the COMESA and SADC Simplified Trade Regimes (STR) and ECOWAS ETLS must be protected from checkpoint discretion. Border officials should have automated, zero-fee fast-tracks for cross-border foodstuffs and artisan goods."
+    },
+    {
+      "id": "pathway_5_shared_risk_and_transit_insurance",
+      "category": "Vehicular & Object Circulation",
+      "title": "Cross-Border Mutual Insurance Systems",
+      "core_idea": "Models like the COMESA Yellow Card (regional motor third-party insurance) demonstrate that vehicles, goods, and couriers can travel across a dozen countries without purchasing duplicate national permits at every checkpoint. Expanding mutual recognition across regional blocs creates seamless continental logistics."
+    },
+    {
+      "id": "pathway_6_demilitarizing_the_checkpoint_mindset",
+      "category": "Human & Relational Practice",
+      "title": "Borders as Authentication & Hospitality Nodes",
+      "core_idea": "Transitioning the physical border post from a hostile, extractive choke-point into a welcoming service and transit hub. When officials and travelers encounter each other through mutual dignity rather than suspicion, passage becomes a safe, communal experience."
+    },
+    {
+      "id": "pathway_7_intellectual_property_and_intangible_circulation",
+      "category": "Creative Goods, Data & IP Circulation",
+      "title": "Bridging Africa's Fragmented Intellectual Property Architecture",
+      "core_idea": "Intangible goods—music, software, designs, cultural production, and digital assets—face an invisible border friction due to Africa's dual IP bloc divide (ARIPO for Anglophone states vs. OAPI's unitary Francophone system) alongside major creative economies like Nigeria, Ethiopia, and South Africa operating outside both blocs with domestic-only registries. While the AfCFTA IPR Protocol binds all State Parties to high-level protections, territorial enforcement gaps leave small creators exposed. Safe passage requires mutual recognition of digital copyrights, automated cross-border registries, and collective licensing frameworks so creators circulate their work without losing legal ownership across borders."
+    },
+    {
+      "id": "pathway_8_chain_protocol_lateral_ratification",
+      "category": "Legal & Spatial Strategy",
+      "title": "The Chain Protocol: 2-by-2 Lateral Border Ratification",
+      "core_idea": "Instead of waiting for slow, unanimous multilateral consensus across an entire bloc, nations along a contiguous geographical corridor (e.g. coastal West African states, or nations sharing contiguous eastern/western borders) can execute bilateral and trilateral 'Chain Protocols' with their direct lateral neighbours. As each link ratifies mutual free transit for people, tangible goods, and intangible assets with its immediate flank neighbours, an unbroken, contiguous safe passage zone emerges organically. The overarching regional body (such as ECOWAS) can then formally recognise, integrate, and officialise these functional chains as living regional corridors that move faster than bureaucratic treaties."
+    },
+    {
+      "id": "pathway_9_domiciled_hardware_and_stem_sovereignty",
+      "category": "Industrial & Digital Sovereignty",
+      "title": "Domiciling Semiconductor & Hardware Fabrication with STEM Incentives",
+      "core_idea": "Continental digital policies (AfCFTA digital trade, data roaming harmonisation, and smart border technologies) cannot achieve genuine autonomy while Africa remains exclusively a consumer of foreign-fabricated electronic hardware. Realising digital sovereignty requires incentivising indigenous investors and technology builders to domicile transistor, microchip, and electronic hardware fabrication on the continent—even starting with specialised modular components. Crucially, this industrial base must be fueled by lowering barriers to entry for domestic hardware manufacturers and actively incentivising STEM, electronics, and micro-engineering education across African universities and vocational hubs."
+    }
+  ]
+}

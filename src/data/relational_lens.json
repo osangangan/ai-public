@@ -1,0 +1,43 @@
+{
+  "project": "A Safe Passage / ai-public",
+  "version": "1.0.0",
+  "title": "The Border as Site of Encounter: Relational & Human Foundations",
+  "context": "Formulated in dialogue with Emeka Okereke (Invisible Borders) and lived African mobility reflections.",
+  "principles": [
+    {
+      "id": "human_as_border",
+      "concept": "The human being becomes the border",
+      "meaning": "The border is never merely concrete, asphalt, or barbed wire. It is internalized into the human ego, fear, authority, and volatile temperaments of officials, transporters, and travelers alike. Physical checkpoints are expressions of internalized administrative conditioning."
+    },
+    {
+      "id": "site_of_encounter",
+      "concept": "The border is a site of encounter",
+      "meaning": "A frontier is where different worlds, linguistic zones, and histories collide. Transcendence does not come from denying friction, but from what human beings make of that encounter—practicing dignity, patience, and mutual recognition in contested spaces."
+    },
+    {
+      "id": "learning_being_with",
+      "concept": "Being with each other must be learned",
+      "meaning": "Colonial borders created artificial linguistic and national islands. Stepping across them can feel like arriving on an entirely new planet with no shared vocabulary. Pan-African kinship is not an automatic assumption—it is an active, tender practice of learning and unlearning."
+    },
+    {
+      "id": "transporters_as_agents",
+      "concept": "Transporters as systemic nodes",
+      "meaning": "Commercial drivers and logistics operators are often co-opted agents who institutionalize and sustain the checkpoint extortion cycle, treating bribery as an operational cost rather than an injustice."
+    },
+    {
+      "id": "pragmatic_optimism",
+      "concept": "Pragmatic Optimism",
+      "meaning": "Rejecting both defeatist cynicism ('Africa cannot work') and naive romanticism ('we have no differences'). It is a grounded, disciplined faith in the possibility of humanizing borders and building durable mobility."
+    },
+    {
+      "id": "displacement_and_assertion",
+      "concept": "Border wars and displacement",
+      "meaning": "Recognising that violent conflicts and forced displacements on the continent often stem from the aggressive assertion and contestation of colonial borderlines."
+    },
+    {
+      "id": "travel_dream_and_sympathy",
+      "concept": "The travel dream produces sympathy",
+      "meaning": "The human desire to wander, witness, and connect is a transformative act. Safe passage is about honoring that dream and replacing militarized suspicion with mutual trust."
+    }
+  ]
+}
