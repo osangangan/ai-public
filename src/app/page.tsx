@@ -1,10 +1,26 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, RotateCcw, Pencil, X, Check, Archive, Database, ShieldCheck, Globe, ChevronDown, Copy } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Send,
+  RotateCcw,
+  ChevronDown,
+  Globe,
+  Archive,
+  Check,
+  X,
+  ShieldCheck,
+  Copy,
+  Pencil,
+  FileText,
+  MessageSquare,
+  Layers,
+  ExternalLink,
+  Cpu
+} from 'lucide-react';
 import VectorFieldBackground from './VectorFieldBackground';
 
-type SupportedLanguage = 'en' | 'sw' | 'ar' | 'fr' | 'pt' | 'es';
+type LanguageCode = 'en' | 'sw' | 'ar' | 'fr' | 'pt' | 'es';
 
 interface Message {
   role: 'user' | 'model';
@@ -21,9 +37,7 @@ interface ArchiveEntry {
   piiStatus: string;
 }
 
-const MAX_EXCHANGES_PER_SESSION = 30;
-
-const LANGUAGE_OPTIONS: { code: SupportedLanguage; label: string; flag: string }[] = [
+const LANGUAGE_OPTIONS: { code: LanguageCode; label: string; flag: string }[] = [
   { code: 'en', label: 'English', flag: 'EN' },
   { code: 'sw', label: 'Kiswahili', flag: 'SW' },
   { code: 'ar', label: 'العربية', flag: 'AR' },
@@ -32,123 +46,285 @@ const LANGUAGE_OPTIONS: { code: SupportedLanguage; label: string; flag: string }
   { code: 'es', label: 'Español', flag: 'ES' },
 ];
 
-export default function SafePassageApp() {
-  const [language, setLanguage] = useState<SupportedLanguage>('en');
-  const [showLangMenu, setShowLangMenu] = useState(false);
+const COMPUTATIONAL_LOADING_PHRASES: Record<LanguageCode, string[]> = {
+  en: [
+    "Exchanging information across waters",
+    ". . .",
+    "Device pinging back and forth with network hardware",
+    ". . .",
+    "Exchanging timestamps with servers",
+    ". . .",
+    "Making API calls",
+    ". . .",
+    "Trafficking packets via voltage pulses, photons, and radio waves",
+    ". . .",
+    "Processing matrices",
+    ". . .",
+    "Taking concurrent actions",
+    ". . ."
+  ],
+  sw: [
+    "Kubadilishana taarifa kuvuka maji na mipaka",
+    ". . .",
+    "Kifaa kinawasiliana na mitambo ya mtandao",
+    ". . .",
+    "Kubadilishana alama za muda na seva",
+    ". . .",
+    "Kufanya miito ya API",
+    ". . .",
+    "Kusafirisha pakiti za data kupitia mipigo ya umeme, fotoni, na mawimbi ya redio",
+    ". . .",
+    "Kuchakata mifumo ya data",
+    ". . .",
+    "Kuchukua hatua sambamba",
+    ". . ."
+  ],
+  ar: [
+    "تبادل المعلومات عبر المياه والحدود",
+    ". . .",
+    "الجهاز يتبادل الإشارات مع عتاد الشبكة",
+    ". . .",
+    "تبادل الطوابع الزمنية مع الخوادم",
+    ". . .",
+    "إجراء استدعاءات لواجهة برمجة التطبيقات (API)",
+    ". . .",
+    "نقل حزم البيانات عبر نبضات الجهد، الفوتونات، وموجات الراديو",
+    ". . .",
+    "معالجة المصفوفات الحسابية",
+    ". . .",
+    "اتخاذ إجراءات متزامنة",
+    ". . ."
+  ],
+  fr: [
+    "Échange d'informations par-delà les eaux",
+    ". . .",
+    "L'appareil échange des signaux avec le matériel réseau",
+    ". . .",
+    "Échange d'horodatages avec les serveurs",
+    ". . .",
+    "Appels API en cours",
+    ". . .",
+    "Transmission des paquets via impulsions de tension, photons et ondes radio",
+    ". . .",
+    "Traitement des matrices",
+    ". . .",
+    "Exécution d'actions concurrentes",
+    ". . ."
+  ],
+  pt: [
+    "Trocando informações através das águas",
+    ". . .",
+    "Dispositivo comunicando com o hardware de rede",
+    ". . .",
+    "Trocando carimbos de data/hora com servidores",
+    ". . .",
+    "Realizando chamadas de API",
+    ". . .",
+    "Trafegando pacotes via pulsos de voltagem, fótons e ondas de rádio",
+    ". . .",
+    "Processando matrizes",
+    ". . .",
+    "Executando ações simultâneas",
+    ". . ."
+  ],
+  es: [
+    "Intercambiando información a través de las aguas",
+    ". . .",
+    "Dispositivo comunicándose con el hardware de red",
+    ". . .",
+    "Intercambiando marcas de tiempo con servidores",
+    ". . .",
+    "Realizando llamadas a la API",
+    ". . .",
+    "Transfiriendo paquetes vía pulsos de voltaje, fotones y ondas de radio",
+    ". . .",
+    "Procesando matrices",
+    ". . .",
+    "Ejecutando acciones simultáneas",
+    ". . ."
+  ]
+};
+
+const ROTATING_PROMPT_INSPIRATIONS: Record<LanguageCode, string[]> = {
+  en: [
+    "Share your experience or ask a question here...",
+    "Thinking of relocating to another African country?",
+    "Crossing with cameras, sound gear, or creative equipment?",
+    "What does the regional trade protocol say about agricultural produce?",
+    "How does mobile SIM roaming work across borders?",
+    "Encountered an arbitrary fee or extortion at a checkpoint?",
+    "Experienced unexpected hospitality while crossing a border?",
+    "Trying to understand why a visa is required between neighboring states?",
+    "Transporting tools or goods between regional markets?"
+  ],
+  sw: [
+    "Shiriki uzoefu wako au uliza swali hapa...",
+    "Je, unafikiria kuhamia nchi nyingine ya Kiafrika?",
+    "Unavuka mpaka na kamera, vifaa vya sauti, au vifaa vya ubunifu?",
+    "Itifaki ya kikanda inasema nini kuhusu mazao ya kilimo?",
+    "Huduma ya kutumia laini ya simu (roaming) inafanyaje kazi kuvuka mpaka?",
+    "Ulikutana na ada isiyo halali au usumbufu kwenye kituo cha ukaguzi?",
+    "Ulipata ukarimu usiotarajiwa wakati wa kuvuka mpaka?",
+    "Kusafirisha bidhaa au vifaa kati ya masoko ya kikanda?"
+  ],
+  ar: [
+    "شارك تجربتك أو اطرح سؤالك هنا...",
+    "هل تفكر في الانتقال إلى بلد إفريقي آخر؟",
+    "هل تعبر الحدود بمعدات تصوير، أجهزة صوتية، أو أدوات إبداعية؟",
+    "ماذا تنص البروتوكولات الإقليمية بشأن المنتجات الزراعية؟",
+    "كيف يعمل التجوال الدولي لشرائح الهاتف عبر الحدود؟",
+    "هل واجهت رسوماً غير قانونية أو ابتزازاً عند نقطة تفتيش؟",
+    "هل حظيت بحسن ضيافة غير متوقع أثناء عبور الحدود؟",
+    "نقل البضائع والمعدات بين الأسواق الإقليمية؟"
+  ],
+  fr: [
+    "Partagez votre expérience ou posez votre question ici...",
+    "Envisagez-vous de vous installer dans un autre pays africain ?",
+    "Vous traversez avec du matériel photo, audio ou de création ?",
+    "Que dit le protocole régional sur les produits agricoles ?",
+    "Comment fonctionne le roaming mobile d'un côté à l'autre ?",
+    "Avez-vous fait face à des frais arbitraires à un poste-frontière ?",
+    "Avez-vous vécu un moment de solidarité inattendu à la frontière ?",
+    "Transport d'outils ou de marchandises entre marchés régionaux ?"
+  ],
+  pt: [
+    "Compartilhe sua experiência ou faça uma pergunta aqui...",
+    "Pensando em se mudar para outro país africano?",
+    "Cruzando a fronteira com câmeras, som ou equipamentos criativos?",
+    "O que diz o protocolo regional sobre produtos agrícolas?",
+    "Como funciona o roaming móvel ao cruzar fronteiras?",
+    "Enfrentou taxas arbitrárias ou extorsão em um posto de controle?",
+    "Teve uma experiência de hospitalidade inesperada na fronteira?",
+    "Transportando ferramentas ou produtos entre mercados regionais?"
+  ],
+  es: [
+    "Comparte tu experiencia o haz una pregunta aquí...",
+    "¿Pensando en mudarte a otro país africano?",
+    "¿Cruzando con cámaras, equipos de sonido o material creativo?",
+    "¿Qué dice el protocolo regional sobre productos agrícolas?",
+    "¿Cómo funciona el roaming móvil al cruzar fronteras?",
+    "¿Enfrentaste cobros arbitrarios o extorsión en un puesto de control?",
+    "¿Viviste una experiencia de hospitalidad inesperada en la frontera?",
+    "¿Transportando herramientas o mercancías entre mercados regionales?"
+  ]
+};
+
+const MAX_EXCHANGES_PER_SESSION = 30;
+
+export default function Home() {
+  const [language, setLanguage] = useState<LanguageCode>('en');
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputStory, setInputStory] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingPhraseIdx, setLoadingPhraseIdx] = useState(0);
+  const [promptInspirationIdx, setPromptInspirationIdx] = useState(0);
   const [showAbout, setShowAbout] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [activeProvider, setActiveProvider] = useState<string>('');
-  const [copiedMsgIdx, setCopiedMsgIdx] = useState<number | null>(null);
+  
+  // Robust 3-way copy state
+  const [activeCopyMenuIdx, setActiveCopyMenuIdx] = useState<number | null>(null);
+  const [copyToastText, setCopyToastText] = useState<string | null>(null);
 
-  // End Session & Archive inspection states
+  // End Session & Archive State
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
   const [archiveCommitted, setArchiveCommitted] = useState(false);
   const [archiveRecord, setArchiveRecord] = useState<ArchiveEntry | null>(null);
 
-  // Relational Loading awareness state
-  const [loadingPhraseIdx, setLoadingPhraseIdx] = useState(0);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const langMenuRef = useRef<HTMLDivElement | null>(null);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const langMenuRef = useRef<HTMLDivElement>(null);
+  const currentLoadingList = COMPUTATIONAL_LOADING_PHRASES[language] || COMPUTATIONAL_LOADING_PHRASES.en;
 
-  const isRTL = language === 'ar';
-  const userMessageCount = messages.filter((m) => m.role === 'user').length;
-  const isLimitReached = userMessageCount >= MAX_EXCHANGES_PER_SESSION;
-
-  const loadingPhrases: Record<SupportedLanguage, string[]> = {
-    en: [
-      'Finding traces...',
-      'Relating databases...',
-      'Tracing regional connections...',
-      'Listening across borders...',
-      'Synthesizing lived reflection...'
-    ],
-    sw: [
-      'Kutafuta nyayo...',
-      'Kuhusianisha kumbukumbu...',
-      'Kufuatilia miunganisho ya kikanda...',
-      'Kusikiliza kuvuka mipaka...',
-      'Kukusanya tafakuri ya kiuhalisia...'
-    ],
-    ar: [
-      'البحث عن الآثار...',
-      'ربط قواعد البيانات...',
-      'تتبع الروابط الإقليمية...',
-      'الإنصات عبر الحدود...',
-      'صياغة الرؤية المعاشة...'
-    ],
-    fr: [
-      'Recherche de traces...',
-      'Mise en relation des données...',
-      'Tracé des connexions régionales...',
-      'Écoute à travers les frontières...',
-      'Synthèse de la réflexion vécue...'
-    ],
-    pt: [
-      'Buscando vestígios...',
-      'Relacionando bases de dados...',
-      'Mapeando conexões regionais...',
-      'Escutando através das fronteiras...',
-      'Sintetizando a reflexão vivida...'
-    ],
-    es: [
-      'Buscando rastros...',
-      'Relacionando bases de datos...',
-      'Trazando conexiones regionales...',
-      'Escuchando a través de las fronteras...',
-      'Sintetizando la reflexión vivida...'
-    ]
-  };
-
+  // Auto-restore and auto-save draft prompt
   useEffect(() => {
-    let interval: any;
-    if (loading) {
-      setLoadingPhraseIdx(0);
-      interval = setInterval(() => {
-        setLoadingPhraseIdx((prev) => (prev + 1) % loadingPhrases[language].length);
-      }, 1600);
-    }
-    return () => clearInterval(interval);
-  }, [loading, language]);
-
-  // Close language menu on outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
-        setShowLangMenu(false);
+    if (typeof window !== 'undefined') {
+      const savedDraft = localStorage.getItem('asp_draft_prompt');
+      if (savedDraft && !inputStory) {
+        setInputStory(savedDraft);
       }
     }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (inputStory) {
+        localStorage.setItem('asp_draft_prompt', inputStory);
+      } else {
+        localStorage.removeItem('asp_draft_prompt');
+      }
+    }
+  }, [inputStory]);
+
+  // Rotate computational loading phrases during active model execution (spaced with . . .)
+  useEffect(() => {
+    if (!loading) return;
+    const interval = setInterval(() => {
+      setLoadingPhraseIdx((prev) => (prev + 1) % currentLoadingList.length);
+    }, 1600);
+    return () => clearInterval(interval);
+  }, [loading, currentLoadingList.length]);
+
+  // Slower rotation for prompt inspirations on homepage only (11 seconds)
+  useEffect(() => {
+    const list = ROTATING_PROMPT_INSPIRATIONS[language] || ROTATING_PROMPT_INSPIRATIONS.en;
+    const interval = setInterval(() => {
+      if (!inputStory.trim()) {
+        setPromptInspirationIdx((prev) => (prev + 1) % list.length);
+      }
+    }, 11000);
+    return () => clearInterval(interval);
+  }, [language, inputStory]);
+
+  // Close menus on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (langMenuRef.current && !langMenuRef.current.contains(target)) {
+        setShowLangMenu(false);
+      }
+      if (!target.closest('.copy-menu-anchor')) {
+        setActiveCopyMenuIdx(null);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const isRTL = language === 'ar';
+  const userMessageCount = messages.filter(m => m.role === 'user').length;
+  const isLimitReached = userMessageCount >= MAX_EXCHANGES_PER_SESSION;
+
+  const currentHomepagePlaceholder = (ROTATING_PROMPT_INSPIRATIONS[language] || ROTATING_PROMPT_INSPIRATIONS.en)[promptInspirationIdx] || 'Share your experience or ask a question here...';
+
+  // TRANSLATION DICTIONARY
   const t = {
     en: {
       title: 'A Safe Passage',
       platformLabel: 'AI Public',
       languageBtnLabel: 'Language',
-      contextTitle: 'Moving across African borders',
-      aboutProjectParagraph1: 'A Safe Passage is an open civic space dedicated to understanding what it takes to travel, trade, create, and stay connected across African frontiers.',
-      treatySubtext: 'Africa\'s regional treaties already codified free movement and trade on paper through ECOWAS, the East African Community, SADC, COMESA, and other regional blocs. Yet the daily reality at checkpoints remains weighed down by bureaucracy, extortion, and arbitrary delays.',
-      postNationality: 'To understand and transform these encounters, we work from a post-national perspective. Post-nationality is an exit from the nation-first framework and an embrace of a human-first framework; that is, that we and the people we encounter are more than just nationals.',
-      aboutProjectParagraph2: 'This engine listens to your lived experience, breaks down the legal, administrative, and human dynamics at play, and builds a collective record of what safe passage looks like in practice.',
-      promptBoxHeading: 'Share an encounter',
-      onboardingPrompt: 'Have you or someone you know faced friction crossing a border, moving goods, or staying connected on the other side? Tell us what happened.',
-      inputPlaceholder: 'Share your experience or question here...',
+      contextTitle: 'Moving Across African Frontiers',
+      aboutProjectParagraph1: 'A Safe Passage is an open civic space dedicated to understanding what it really takes to move freely across African frontiers, with people, produce, creative goods, and digital connectivity.',
+      treatySubtext: 'Africa\'s regional treaties have already codified free movement and trade on paper through ECOWAS, the EAC, SADC, COMESA, and other regional blocs. Yet daily reality at checkpoints remains burdened by bureaucracy, arbitrary delays, and extortion.',
+      postNationality: 'To understand and navigate these encounters, we work from a post-national perspective. Post-nationality is an exit from the nation-first framework and an embrace of a human-first framework; that is, that we and the people we encounter are more than just nationals.',
+      aboutProjectParagraph2: 'This engine listens to your lived encounters, breaks down the administrative, legal, and human mechanisms at play, and helps foster a shared, citizen-level perspective on free movement.',
+      promptBoxHeading: 'Share an Experience, Question, or Intention',
+      onboardingPrompt: 'Whether you are planning a journey, seeking clarity on regional trade protocols and roaming, or reflecting on an encounter at a checkpoint, tell us what is on your mind.',
       sendBtn: 'Send',
-      resetBtn: 'Start over',
+      resetBtn: 'Start New Session',
       aboutNav: 'About',
       aboutTitle: 'About A Safe Passage',
-      aboutBody: 'A Safe Passage is an interactive civic informatics engine developed by Iretomiwa Sharon Omodeinde (of 2001 Collective) within the Dreaming New Worlds 2026 programme. It treats the lived friction of African border crossing as civic data worth understanding. Grounded in post-national thought, it uses real experiences to examine where systems fail people, and what citizen-led safe passage looks like in practice.',
-      languageExpansionNotice: 'Language & Continental Reach: A Safe Passage currently supports Kiswahili, Arabic, English, French, Portuguese, and Spanish. As this public archive and civic governance model grow, our commitment is to expand into major indigenous languages spoken across the African continent (such as Hausa, Yoruba, Igbo, Amharic, Oromo, Lingala, isiZulu, Shona, Bambara, and more).',
-      sessionGovernanceNotice: 'Session Governance: To preserve thoughtful inquiry and open server availability, each active session is allocated up to 30 exchanges. At any point during or at the end of the session, travelers may conclude and commit an anonymized reflection to the Mobility Archive.',
+      aboutBody: 'A Safe Passage is an interactive civic informatics engine developed by Iretomiwa Sharon Omodeinde (of 2001 Collective) within the Dreaming New Worlds 2026 programme. It treats the friction of African border encounters as civic data worth understanding. Rooted in post-national thought, it uses lived experience to examine where systems fail people and what safe, citizen-led passage looks like in practice.',
+      languageExpansionNotice: 'Languages and Continental Scope: A Safe Passage currently supports Kiswahili, Arabic, English, French, Portuguese, and Spanish. As this public archive and civic governance model grows, our commitment is to expand to major indigenous languages spoken across the African continent (such as Hausa, Yoruba, Igbo, Amharic, Oromo, Lingala, isiZulu, Shona, Bambara, and more).',
+      sessionGovernanceNotice: 'Session Governance: To preserve deliberative focus and ensure open server access for all travelers, each active session allows up to 30 exchanges. At any point during or at the end of the session, travelers can conclude and commit an anonymised reflection to the Mobility Archive.',
       editLabel: 'Edit',
       copyLabel: 'Copy',
+      copyPromptLabel: 'Copy prompt',
+      copyResponseLabel: 'Copy response',
+      copyBothLabel: 'Copy both',
       copiedLabel: 'Copied!',
       viaPrefix: 'via',
-      chatInputPlaceholder: 'Continue the conversation...',
+      chatInputPlaceholder: 'Type your message or follow-up question here...',
       chatLimitPlaceholder: 'Session limit reached (30/30 exchanges). Ready to conclude.',
       sessionActiveNotice: 'Active conversation · Ready to wrap up?',
       exchangeCountBadge: `Exchange ${userMessageCount} of ${MAX_EXCHANGES_PER_SESSION}`,
@@ -164,32 +340,31 @@ export default function SafePassageApp() {
       startNewSessionBtn: 'Start New Session',
       recordIdLabel: 'Record ID',
       timestampLabel: 'Timestamp',
-      scrubbedTestimonyLabel: 'PII-Scrubbed Testimony',
-      reflectionLabel: 'Relational Reflection & Synthesis',
+      scrubbedTestimonyLabel: 'Scrubbed Testimony',
+      reflectionLabel: 'Relational Diagnosis & Synthesis',
       regionalFrameTitle: 'Regional Treaties & Protocols Across Africa:',
       regions: [
-        { name: 'West Africa (ECOWAS / AES)', desc: '90-day visa-free entry, 0% agricultural tariffs (ETLS), and unified Sahelian biometric passports.' },
-        { name: 'East Africa (EAC)', desc: 'National ID card border travel (Kenya/Uganda/Rwanda), Single Tourist Visa, and One Network Area (ONA) data roaming.' },
-        { name: 'Southern Africa (SADC)', desc: 'Simplified Trade Regime (STR) for small traders and regional home-roaming flat rates.' },
-        { name: 'Eastern & Southern (COMESA)', desc: 'COMESA Yellow Card (13-nation motor insurance) and Simplified Trade Regime ($2,000 threshold).' },
-        { name: 'Central Africa (CEMAC)', desc: 'Biometric CEMAC passport visa-free movement across 6 member states.' },
-        { name: 'Continental (AU / AfCFTA / Smart Africa)', desc: 'Free Movement Protocol, AfCFTA digital trade, and One Africa Network (OAN).' }
+        { name: 'West Africa (ECOWAS / AES)', desc: '90-day visa-free entry, 0% tariffs on local agricultural produce (ETLS), and biometric Sahel travel documents.' },
+        { name: 'East Africa (EAC)', desc: 'National ID card travel (Kenya/Uganda/Rwanda), Single Tourist Visa, and One Network Area (ONA) telecom roaming.' },
+        { name: 'Southern Africa (SADC)', desc: 'Simplified Trade Regime (STR) for small-scale cross-border traders and regional flat-rate roaming agreements.' },
+        { name: 'Eastern & Southern (COMESA)', desc: 'COMESA Yellow Card (cross-border motor insurance in 13+ nations) and simplified customs clearance.' },
+        { name: 'Central Africa (CEMAC)', desc: 'Visa-free circulation with biometric CEMAC passport across 6 member states.' },
+        { name: 'Continental (AU / AfCFTA / Smart Africa)', desc: 'Free Movement Protocol, AfCFTA digital trade protocols, and One Africa Network (OAN)' }
       ]
     },
     sw: {
       title: 'A Safe Passage',
       platformLabel: 'AI Public',
       languageBtnLabel: 'Lugha',
-      contextTitle: 'Kuvuka mipaka ya Afrika',
-      aboutProjectParagraph1: 'A Safe Passage ni jukwaa huru la kiraia lililojitolea kuelewa kile kinachohitajika ili kusafiri, kufanya biashara, kubuni na kuunganishwa kimawasiliano kuvuka mipaka ya Afrika.',
-      treatySubtext: 'Mikataba ya kikanda ya Afrika tayari ilirasimisha uhuru wa kutembea na biashara kwenye maandishi kupitia jumuiya kama EAC, SADC, ECOWAS na COMESA. Hata hivyo, uhalisia wa kila siku kwenye vizuizi vya mpakani bado umegubikwa na urasimu, ucheleweshaji na vikwazo visivyo rasmi.',
-      postNationality: 'Ili kuelewa na kubadilisha hali hii, tunatumia mtazamo wa utaifa-baada. Utaifa-baada (post-nationality) ni kutoka katika mtazamo unaotanguliza taifa kwanza na kukumbatia mtazamo unaotanguliza utu kwanza; yaani, kwamba sisi na watu tunaokutana nao mpakani ni zaidi ya raia wa nchi fulani tu.',
-      aboutProjectParagraph2: 'Chombo hiki kinasikiliza uzoefu wako halisi, kinachambua taratibu za kisheria, kiutawala na kibinadamu, na kujenga kumbukumbu ya pamoja ya namna safari salama inavyopaswa kuwa katika vitendo.',
-      promptBoxHeading: 'Shiriki uzoefu wako',
-      onboardingPrompt: 'Je, wewe au mtu unayemfahamu amewahi kukumbana na vikwazo akivuka mpaka, akisafirisha bidhaa, au akitafuta mtandao wa mawasiliano ng\'ambo ya mpaka? Tueleze yaliyojiri.',
-      inputPlaceholder: 'Shiriki uzoefu wako au uliza swali hapa...',
+      contextTitle: 'Kusafiri Katika Mipaka ya Afrika',
+      aboutProjectParagraph1: 'A Safe Passage ni uwanja huru wa kiraia uliojitolea kuelewa kile kinachohitajika ili kusafiri kwa uhuru kuvuka mipaka ya Afrika, tukiwa na watu, mazao, bidhaa za ubunifu, na mawasiliano ya kidijitali.',
+      treatySubtext: 'Mikataba ya kikanda barani Afrika tayari imerasimisha uhuru wa kutembea na biashara kupitia jumuiya kama EAC, ECOWAS, SADC, na COMESA. Hata hivyo, uhalisia wa kila siku mipakani bado umegubikwa na urasimu, ucheleweshaji usio na sababu, na rushwa.',
+      postNationality: 'Ili kuelewa na kukabiliana na changamoto hizi, tunatumia mtazamo wa utu-kwanza. Mtazamo huu unavuka mipaka ya utaifa na kuweka mbele utu wetu; yaani, sisi na wale tunaokutana nao mipakani ni zaidi ya raia wa nchi fulani.',
+      aboutProjectParagraph2: 'Mfumo huu unasikiliza simulizi na uzoefu wako halisi, unachambua mifumo ya kisheria, kiutawala na ya kibinadamu, na kusaidia kujenga mtazamo wa pamoja wa kiraia kuhusu uhuru wa kutembea.',
+      promptBoxHeading: 'Shiriki Uzoefu, Swali, au Kusudio Lako',
+      onboardingPrompt: 'Iwe unapanga safari, unatafuta ufafanuzi kuhusu itifaki za biashara au mawasiliano mipakani, au unatafakari kuhusu yaliyokukuta kwenye kituo cha ukaguzi, tuambie unachowaza.',
       sendBtn: 'Tuma',
-      resetBtn: 'Anza upya',
+      resetBtn: 'Anza Kikao Kipya',
       aboutNav: 'Kuhusu',
       aboutTitle: 'Kuhusu A Safe Passage',
       aboutBody: 'A Safe Passage ni mfumo wa kiraia unaoingiliana ulioundwa na Iretomiwa Sharon Omodeinde (wa 2001 Collective) ndani ya mpango wa Dreaming New Worlds 2026. Unachukulia msuguano unaopatikana wakati wa kuvuka mipaka ya Afrika kama data muhimu ya kiraia. Ikiwa imejikita katika mtazamo wa utu-kwanza, inachunguza pale mifumo inaposhindwa kuwatendea haki wananchi.',
@@ -197,9 +372,12 @@ export default function SafePassageApp() {
       sessionGovernanceNotice: 'Usimamizi wa Vikao: Ili kuhifadhi tafakuri makini na upatikanaji wazi wa mfumo, kila kikao kinachofanya kazi kinaruhusu hadi mabadilishano 30 ya mazungumzo. Wakati wowote wakati au mwisho wa kikao, wasafiri wanaweza kuhitimisha na kuhifadhi tafakuri isiyo na majina kwenye Kumbukumbu ya Uhamaji.',
       editLabel: 'Hariri',
       copyLabel: 'Nakili',
+      copyPromptLabel: 'Nakili swali',
+      copyResponseLabel: 'Nakili jibu',
+      copyBothLabel: 'Nakili vyote',
       copiedLabel: 'Imenakiliwa!',
       viaPrefix: 'kupitia',
-      chatInputPlaceholder: 'Endelea na mazungumzo...',
+      chatInputPlaceholder: 'Andika ujumbe wako au swali hapa...',
       chatLimitPlaceholder: 'Kikomo cha kikao kimefikiwa (30/30). Tayari kuhitimisha.',
       sessionActiveNotice: 'Mazungumzo yanaendelea · Je, uko tayari kuhitimisha?',
       exchangeCountBadge: `Mazungumzo ${userMessageCount} ya ${MAX_EXCHANGES_PER_SESSION}`,
@@ -224,7 +402,7 @@ export default function SafePassageApp() {
         { name: 'Kusini mwa Afrika (SADC)', desc: 'Mfumo Rahisi wa Biashara (STR) kwa wafanyabiashara wadogo na viwango nafuu vya mawasiliano ya kikanda.' },
         { name: 'Mashariki na Kusini (COMESA)', desc: 'Kadi ya Njano ya COMESA (bima ya gari inayotumika katika nchi 13+) na mfumo rahisi wa biashara.' },
         { name: 'Afrika ya Kati (CEMAC)', desc: 'Kusafiri bila visa kwa pasipoti ya kibiometriki ya CEMAC katika nchi 6 wanachama.' },
-        { name: 'Bara Zima (AU / AfCFTA / Smart Africa)', desc: 'Itifaki ya Uhuru wa Kutembea, biashara ya kidijitali ya AfCFTA na mtandao wa One Africa Network (OAN).' }
+        { name: 'Bara Zima (AU / AfCFTA / Smart Africa)', desc: 'Itifaki ya Uhuru wa Kutembea, biashara ya kidijitali ya AfCFTA na mtandao wa One Africa Network (OAN)' }
       ]
     },
     ar: {
@@ -236,9 +414,8 @@ export default function SafePassageApp() {
       treatySubtext: 'قننت المعاهدات الإقليمية الإفريقية حرية التنقل والتجارة على الورق عبر تكتلات مثل إيكواس، ومجتمع شرق إفريقيا، وسادك، وكوميسا. ورغم ذلك، لا يزال الواقع اليومي عند المعابر مثقلاً بالبيروقراطية، والتعطيل التعسفي، والابتزاز.',
       postNationality: 'لفهم هذه التجارب وتجاوزها، ننطلق من منظور ما بعد القومية. ما بعد القومية هو خروج من الإطار الذي يضع الدولة أولاً وتبني إطار يضع الإنسان أولاً؛ أي أننا والأشخاص الذين نلتقي بهم عند الحدود أكثر من مجرد رعايا دول.',
       aboutProjectParagraph2: 'يستمع هذا المحرك إلى تجاربكم الواقعية، ويفكك الأبعاد القانونية والإدارية والإنسانية الفاعلة، ويسهم في بناء سجل جماعي لما يعنيه المرور الآمن في الممارسة اليومية.',
-      promptBoxHeading: 'شارك تجربة مررت بها',
-      onboardingPrompt: 'هل واجهت أنت أو شخص تعرفه صعوبات أثناء عبور الحدود، أو نقل البضائع، أو محاولة البقاء على اتصال بالإنترنت في الجانب الآخر؟ أخبرنا بما جرى.',
-      inputPlaceholder: 'شارك تجربتك أو اطرح سؤالك هنا...',
+      promptBoxHeading: 'شارك تجربة، سؤالاً، أو نية للسفر',
+      onboardingPrompt: 'سواء كنت تخطط لرحلة، أو تبحث عن توضيح بشأن البروتوكولات التجارية الإقليمية والتجوال، أو تتأمل في تجربة مررت بها عند نقطة تفتيش، شاركنا بما يدور في ذهنك.',
       sendBtn: 'إرسال',
       resetBtn: 'إعادة البدء',
       aboutNav: 'عن المشروع',
@@ -248,9 +425,12 @@ export default function SafePassageApp() {
       sessionGovernanceNotice: 'حوكمة الجلسات: للحفاظ على عمق الحوار وضمان كفاءة الخوادم للجميع، تتيح كل جلسة نشطة ما يصل إلى 30 تبادلاً حوارياً. يمكن للمستخدم في أي لحظة أو عند اكتمال الجلسة إنهاء المحادثة وتوثيق خلاصتها المجردة من الهوية في أرشيف التنقل.',
       editLabel: 'تعديل',
       copyLabel: 'نسخ',
+      copyPromptLabel: 'نسخ السؤال',
+      copyResponseLabel: 'نسخ الرد',
+      copyBothLabel: 'نسخ الكل',
       copiedLabel: 'تم النسخ!',
       viaPrefix: 'عبر',
-      chatInputPlaceholder: 'تابع المحادثة...',
+      chatInputPlaceholder: 'اكتب رسالتك أو استفسارك هنا...',
       chatLimitPlaceholder: 'تم بلوغ حد الجلسة (30/30 تبادلاً). جاهز للإنهاء.',
       sessionActiveNotice: 'المحادثة نشطة · هل ترغب في الإنهاء؟',
       exchangeCountBadge: `التبادل ${userMessageCount} من ${MAX_EXCHANGES_PER_SESSION}`,
@@ -275,7 +455,7 @@ export default function SafePassageApp() {
         { name: 'الجنوب الإفريقي (SADC)', desc: 'نظام تجاري مبسط (STR) لصغار التجار وأسعار تجوال إقليمية موحدة.' },
         { name: 'الشرق والجنوب (COMESA)', desc: 'البطاقة الصفراء للتأمين على المركبات (13 دولة) ونظام تجاري مبسط.' },
         { name: 'وسط إفريقيا (CEMAC)', desc: 'تنقل بدون تأشيرة بجواز سفر CEMAC البيومتري عبر 6 دول أعضاء.' },
-        { name: 'القارة (الاتحاد الإفريقي / ZLECAf / Smart Africa)', desc: 'بروتوكول حرية التنقل، التجارة الرقمية لمنطقة التجارة الحرة القارية، وشبكة One Africa Network (OAN).' }
+        { name: 'القارة (الاتحاد الإفريقي / ZLECAf / Smart Africa)', desc: 'بروتوكول حرية التنقل، التجارة الرقمية لمنطقة التجارة الحرة القارية، وشبكة One Africa Network (OAN)' }
       ]
     },
     fr: {
@@ -287,9 +467,8 @@ export default function SafePassageApp() {
       treatySubtext: 'Les traités régionaux africains ont déjà codifié la libre circulation et les échanges sur le papier à travers la CEDEAO, la CAE, la SADC, le COMESA et d\'autres blocs. Pourtant, la réalité quotidienne aux postes de contrôle reste alourdie par la bureaucratie, les tracasseries et les retards arbitraires.',
       postNationality: 'Pour comprendre et transformer ces rencontres, nous adoptons une perspective post-nationale. La post-nationalité est une sortie du cadre centré sur la nation pour embrasser un cadre centré sur l\'humain ; c\'est-à-dire que nous et les personnes que nous rencontrons sommes bien plus que de simples ressortissants nationaux.',
       aboutProjectParagraph2: 'Cet outil écoute vos expériences vécues, analyse les mécanismes juridiques, administratifs et humains en jeu, et contribue à bâtir une mémoire collective de ce qu\'est un passage sûr dans la pratique.',
-      promptBoxHeading: 'Partagez une expérience',
-      onboardingPrompt: 'Avez-vous, ou une personne de votre entourage, rencontré des difficultés en franchissant une frontière, en transportant des marchandises ou en cherchant à rester connecté de l\'autre côté ? Racontez-nous ce qui s\'est passé.',
-      inputPlaceholder: 'Partagez votre expérience ou posez votre question ici...',
+      promptBoxHeading: 'Partagez une expérience, une question ou un projet',
+      onboardingPrompt: 'Que vous planifiiez un voyage, cherchiez des clarifications sur les protocoles commerciaux ou le roaming, ou réfléchissiez à une expérience vécue à un poste-frontière, partagez ce qui vous préoccupe.',
       sendBtn: 'Envoyer',
       resetBtn: 'Recommencer',
       aboutNav: 'À propos',
@@ -299,9 +478,12 @@ export default function SafePassageApp() {
       sessionGovernanceNotice: 'Gouvernance des sessions : Afin de préserver la qualité de la réflexion et l\'accessibilité du serveur pour tous, chaque session active autorise jusqu\'à 30 échanges. À tout moment ou au terme de la session, les voyageurs peuvent conclure et enregistrer une réflexion anonymisée dans l\'Archive de Mobilité.',
       editLabel: 'Modifier',
       copyLabel: 'Copier',
+      copyPromptLabel: 'Copier la question',
+      copyResponseLabel: 'Copier la réponse',
+      copyBothLabel: 'Copier les deux',
       copiedLabel: 'Copié !',
       viaPrefix: 'via',
-      chatInputPlaceholder: 'Poursuivez la conversation...',
+      chatInputPlaceholder: 'Écrivez votre message ou votre question ici...',
       chatLimitPlaceholder: 'Limite de session atteinte (30/30 échanges). Prêt à conclure.',
       sessionActiveNotice: 'Conversation active · Prêt à conclure ?',
       exchangeCountBadge: `Échange ${userMessageCount} sur ${MAX_EXCHANGES_PER_SESSION}`,
@@ -326,7 +508,7 @@ export default function SafePassageApp() {
         { name: 'Afrique Australe (SADC)', desc: 'Régime Commercial Simplifié (STR) pour les petits commerçants et accords d\'itinérance mobile.' },
         { name: 'Est & Sud (COMESA)', desc: 'Carte Jaune COMESA (assurance automobile valable dans 13+ pays) et régime commercial simplifié.' },
         { name: 'Afrique Centrale (CEMAC)', desc: 'Circulation sans visa avec passeport biométrique CEMAC dans les 6 États membres.' },
-        { name: 'Continental (UA / ZLECAf / Smart Africa)', desc: 'Protocole de libre circulation, commerce numérique ZLECAf et réseau One Africa Network (OAN).' }
+        { name: 'Continental (UA / ZLECAf / Smart Africa)', desc: 'Protocole de libre circulation, commerce numérique ZLECAf et réseau One Africa Network (OAN)' }
       ]
     },
     pt: {
@@ -338,9 +520,8 @@ export default function SafePassageApp() {
       treatySubtext: 'Os tratados regionais africanos já codificaram a livre circulação e o comércio no papel por meio da CEDEAO, EAC, SADC, COMESA e outros blocos. No entanto, a realidade diária nos postos de controle continua marcada pela burocracia, extorsões e atrasos arbitrários.',
       postNationality: 'Para compreender e transformar esses encontros, trabalhamos a partir de uma perspectiva pós-nacional. Pós-nacionalidade é a saída da estrutura focada na nação para abraçar uma estrutura focada no ser humano; ou seja, nós e as pessoas que encontramos somos muito mais do que meros cidadãos nacionais.',
       aboutProjectParagraph2: 'Este mecanismo escuta suas vivências, analisa as dinámicas legais, administrativas e humanas em jogo e constrói um registro coletivo de como deve ser uma passagem segura na prática.',
-      promptBoxHeading: 'Compartilhe uma vivência',
-      onboardingPrompt: 'Você ou alguém que você conhece já enfrentou dificuldades ao cruzar uma fronteira, transportar mercadorias ou tentar manter conexão de internet do outro lado? Conte-nos o que aconteceu.',
-      inputPlaceholder: 'Compartilhe sua experiência ou faça uma pergunta aqui...',
+      promptBoxHeading: 'Compartilhe uma experiência, pergunta ou intenção',
+      onboardingPrompt: 'Quer esteja planejando uma viagem, buscando esclarecimentos sobre protocolos de comércio e roaming regional, ou refletindo sobre um encontro em um posto de controle, compartilhe o que tem em mente.',
       sendBtn: 'Enviar',
       resetBtn: 'Recomeçar',
       aboutNav: 'Sobre',
@@ -350,9 +531,12 @@ export default function SafePassageApp() {
       sessionGovernanceNotice: 'Governança das Sessões: Para preservar o foco reflexivo e garantir o acesso público aberto, cada sessão ativa permite até 30 trocas de mensagens. A qualquer momento ou ao atingir o limite, os viajantes podem concluir e registrar uma reflexão anonimizada no Arquivo de Mobilidade.',
       editLabel: 'Editar',
       copyLabel: 'Copiar',
+      copyPromptLabel: 'Copiar pergunta',
+      copyResponseLabel: 'Copiar resposta',
+      copyBothLabel: 'Copiar ambos',
       copiedLabel: 'Copiado!',
       viaPrefix: 'via',
-      chatInputPlaceholder: 'Continue a conversa...',
+      chatInputPlaceholder: 'Digite sua mensagem ou pergunta de acompanhamento aqui...',
       chatLimitPlaceholder: 'Limite da sessão atingido (30/30 trocas). Pronto para concluir.',
       sessionActiveNotice: 'Conversa ativa · Pronto para concluir?',
       exchangeCountBadge: `Troca ${userMessageCount} de ${MAX_EXCHANGES_PER_SESSION}`,
@@ -377,7 +561,7 @@ export default function SafePassageApp() {
         { name: 'África Austral (SADC)', desc: 'Regime Comercial Simplificado (STR) para pequenos comerciantes e tarifas planas de roaming regional.' },
         { name: 'Leste e Sul (COMESA)', desc: 'Cartão Amarelo COMESA (seguro automóvel em 13+ países) e regime comercial simplificado.' },
         { name: 'África Central (CEMAC)', desc: 'Circulação sem visto com passaporte biométrico CEMAC em 6 Estados-membros.' },
-        { name: 'Continental (União Africana / AfCFTA / Smart Africa)', desc: 'Protocolo de Livre Circulação, comércio digital da AfCFTA e rede One Africa Network (OAN).' }
+        { name: 'Continental (União Africana / AfCFTA / Smart Africa)', desc: 'Protocolo de Livre Circulação, comércio digital da AfCFTA e rede One Africa Network (OAN)' }
       ]
     },
     es: {
@@ -388,10 +572,9 @@ export default function SafePassageApp() {
       aboutProjectParagraph1: 'A Safe Passage es un espacio cívico abierto dedicado a comprender lo que implica viajar, comerciar, crear y mantenerse conectado a través de las fronteras de África.',
       treatySubtext: 'Los tratados regionales africanos ya codificaron el libre movimiento y el comercio sobre el papel a través de la CEDEAO, la Comunidad de África Oriental, la SADC, el COMESA y otros bloques. Sin embargo, la realidad cotidiana en los puestos de control sigue marcada por la burocracia, la extorsión y las demoras arbitrarias.',
       postNationality: 'Para comprender y transformar estos encuentros, trabajamos desde una perspectiva posnacional. La posnacionalidad es una salida del marco centrado en la nación para abrazar un marco centrado en el ser humano; es decir, que nosotros y las personas con quienes nos encontramos somos más que simples ciudadanos nacionales.',
-      aboutProjectParagraph2: 'Este motor escucha tus vivencias, analiza las dinámicas legales, administrativas y humanas en juego y construye un registro colectivo de lo que significa un paso seguro en la práctica.',
-      promptBoxHeading: 'Comparte una experiencia',
-      onboardingPrompt: '¿Tú o alguien que conoces ha enfrentado dificultades al cruzar una frontera, transportar mercancías o intentar mantener conexión a internet del otro lado? Cuéntanos qué sucedió.',
-      inputPlaceholder: 'Comparte tu experiencia o haz una pregunta aquí...',
+      aboutProjectParagraph2: 'Este motor escucha tus vivencias, analiza las dinámicas legales, administrativas e humanas en juego y construye un registro colectivo de lo que significa un paso seguro en la práctica.',
+      promptBoxHeading: 'Comparte una experiencia, pregunta o intención',
+      onboardingPrompt: 'Ya sea que estés planeando un viaje, buscando claridad sobre protocolos de comercio y roaming regional, o reflexionando sobre un encuentro en un puesto de control, cuéntanos lo que tienes en mente.',
       sendBtn: 'Enviar',
       resetBtn: 'Reiniciar',
       aboutNav: 'Acerca de',
@@ -401,9 +584,12 @@ export default function SafePassageApp() {
       sessionGovernanceNotice: 'Gobernanza de las sesiones: Para preservar un diálogo reflexivo y garantizar el acceso abierto a los servidores, cada sesión activa permite hasta 30 intercambios. En cualquier momento o al alcanzar el límite, los viajeros pueden concluir y registrar una reflexión anonimizada en el Archivo de Movilidad.',
       editLabel: 'Editar',
       copyLabel: 'Copiar',
+      copyPromptLabel: 'Copiar pregunta',
+      copyResponseLabel: 'Copiar respuesta',
+      copyBothLabel: 'Copiar ambos',
       copiedLabel: '¡Copiado!',
       viaPrefix: 'vía',
-      chatInputPlaceholder: 'Continúa la conversación...',
+      chatInputPlaceholder: 'Escribe tu mensaje o pregunta de seguimiento aquí...',
       chatLimitPlaceholder: 'Límite de sesión alcanzado (30/30 intercambios). Listo para concluir.',
       sessionActiveNotice: 'Conversación activa · ¿Listo para concluir?',
       exchangeCountBadge: `Intercambio ${userMessageCount} de ${MAX_EXCHANGES_PER_SESSION}`,
@@ -428,7 +614,7 @@ export default function SafePassageApp() {
         { name: 'África Austral (SADC)', desc: 'Régimen comercial simplificado (STR) para pequeños comerciantes y tarifas planas de roaming regional.' },
         { name: 'Oriental y Austral (COMESA)', desc: 'Tarjeta Amarilla COMESA (seguro automotor en 13+ países) y régimen comercial simplificado.' },
         { name: 'África Central (CEMAC)', desc: 'Circulación sin visa con pasaporte biométrico CEMAC en 6 Estados miembros.' },
-        { name: 'Continental (Unión Africana / ZLECAf / Smart Africa)', desc: 'Protocolo de Libre Circulación, comercio digital de la ZLECAf y red One Africa Network (OAN).' }
+        { name: 'Continental (Unión Africana / ZLECAf / Smart Africa)', desc: 'Protocolo de Libre Circulación, comercio digital de la ZLECAf y red One Africa Network (OAN)' }
       ]
     }
   }[language];
@@ -508,22 +694,31 @@ export default function SafePassageApp() {
     setMessages(messages.slice(0, idx));
   };
 
-  const handleCopyExchange = (modelIdx: number) => {
+  // Robust 3-Way Copy Execution
+  const executeCopy = (type: 'prompt' | 'reflection' | 'both', modelIdx: number) => {
     const precedingUserMsg = messages
       .slice(0, modelIdx)
       .reverse()
       .find((m) => m.role === 'user')?.content || '';
     const modelMsg = messages[modelIdx]?.content || '';
 
-    const formattedText = precedingUserMsg
-      ? `[PROMPT]\n${precedingUserMsg}\n\n[A SAFE PASSAGE]\n${modelMsg}`
-      : modelMsg;
+    let textToCopy = '';
+    if (type === 'prompt') {
+      textToCopy = precedingUserMsg || modelMsg;
+    } else if (type === 'reflection') {
+      textToCopy = modelMsg;
+    } else {
+      textToCopy = precedingUserMsg
+        ? `[PROMPT]\n${precedingUserMsg}\n\n[A SAFE PASSAGE]\n${modelMsg}`
+        : modelMsg;
+    }
 
-    navigator.clipboard.writeText(formattedText).then(() => {
-      setCopiedMsgIdx(modelIdx);
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopyToastText(`Copied ${type === 'prompt' ? 'Prompt' : type === 'reflection' ? 'Response' : 'Exchange'}!`);
+      setActiveCopyMenuIdx(null);
       setTimeout(() => {
-        setCopiedMsgIdx(null);
-      }, 2000);
+        setCopyToastText(null);
+      }, 2200);
     });
   };
 
@@ -552,12 +747,13 @@ export default function SafePassageApp() {
     setShowEndSessionModal(false);
     setArchiveCommitted(false);
     setArchiveRecord(null);
+    setActiveCopyMenuIdx(null);
   };
 
   return (
     <>
-      {/* 2D VECTOR FIELD GENERATIVE BACKGROUND CANVAS */}
-      <VectorFieldBackground />
+      {/* 2D VECTOR FIELD GENERATIVE BACKGROUND CANVAS (RETRO SQUID EASTER EGG SWIMS CONTINUOUSLY) */}
+      <VectorFieldBackground isProcessing={loading} />
 
       {/* FOREGROUND MAIN UI */}
       <div 
@@ -598,7 +794,10 @@ export default function SafePassageApp() {
             {/* Language Selector Dropdown */}
             <div ref={langMenuRef} style={{ position: 'relative' }}>
               <button
-                onClick={() => setShowLangMenu(!showLangMenu)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowLangMenu(!showLangMenu);
+                }}
                 style={{
                   background: '#ffffff',
                   color: '#6d28d9',
@@ -648,39 +847,58 @@ export default function SafePassageApp() {
                         border: 'none',
                         borderBottom: '1px solid #f1f5f9',
                         textAlign: isRTL ? 'right' : 'left',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
+                        cursor: 'pointer'
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = '#faf5ff')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = language === opt.code ? '#f5f3ff' : '#ffffff')}
                     >
-                      <span>{opt.label}</span>
-                      <span style={{ fontSize: '9px', color: '#94a3b8', fontWeight: '700' }}>[{opt.flag}]</span>
+                      {opt.label}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
+            {/* About Navigation Button */}
             <button
               onClick={() => setShowAbout(true)}
               style={{
-                background: '#4c1d95',
-                color: '#ffffff',
+                background: '#ffffff',
+                color: '#6d28d9',
                 border: '2px solid #ffffff',
                 padding: '4px 10px',
-                cursor: 'pointer',
                 fontSize: '11px',
                 fontWeight: '800',
-                boxShadow: '2px 2px 0px #2e1065'
+                cursor: 'pointer',
+                boxShadow: '2px 2px 0px #4c1d95'
               }}
             >
               {t.aboutNav}
             </button>
           </div>
         </header>
+
+        {/* COPY TOAST NOTIFIER */}
+        {copyToastText && (
+          <div style={{
+            position: 'fixed',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#0f172a',
+            color: '#ffffff',
+            padding: '8px 16px',
+            fontSize: '12px',
+            fontWeight: '700',
+            border: '2px solid #6d28d9',
+            boxShadow: '3px 3px 0px #6d28d9',
+            zIndex: 300,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <Check size={14} style={{ color: '#4ade80' }} />
+            <span>{copyToastText}</span>
+          </div>
+        )}
 
         {/* HOMEPAGE / ONBOARDING */}
         {messages.length === 0 ? (
@@ -754,7 +972,7 @@ export default function SafePassageApp() {
               </p>
             </div>
 
-            {/* 2. PROMPT BOX */}
+            {/* 2. PROMPT BOX WITH HARMONIZED HEADING AND ROTATING PLACEHOLDER (PIXEL FONT & LARGER SIZE) */}
             <div style={{
               border: '2px solid #000000',
               padding: '18px 20px',
@@ -780,20 +998,21 @@ export default function SafePassageApp() {
               <textarea
                 value={inputStory}
                 onChange={(e) => setInputStory(e.target.value)}
-                placeholder={t.inputPlaceholder}
+                placeholder={currentHomepagePlaceholder}
                 rows={3}
                 style={{
                   width: '100%',
                   background: '#ffffff',
                   border: '2px solid #000000',
-                  padding: '10px',
+                  padding: '12px 14px',
                   color: '#000000',
-                  fontSize: '13px',
+                  fontSize: '15px',
                   lineHeight: '1.5',
-                  fontFamily: 'inherit',
+                  fontFamily: 'var(--font-pixel)',
                   resize: 'none',
                   outline: 'none',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  transition: 'placeholder 0.4s ease'
                 }}
               />
 
@@ -853,7 +1072,7 @@ export default function SafePassageApp() {
               </button>
             </div>
 
-            {/* Messages */}
+            {/* Messages Feed */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, overflowY: 'auto' }}>
               {messages.map((msg, idx) => (
                 <div
@@ -889,13 +1108,26 @@ export default function SafePassageApp() {
                       </button>
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', justifyContent: isRTL ? 'flex-end' : 'flex-start', marginBottom: '3px' }}>
+                    /* ROBUST 3-WAY COPY POPOVER */
+                    <div
+                      className="copy-menu-anchor"
+                      style={{
+                        display: 'flex',
+                        justifyContent: isRTL ? 'flex-end' : 'flex-start',
+                        marginBottom: '3px',
+                        position: 'relative'
+                      }}
+                    >
                       <button
-                        onClick={() => handleCopyExchange(idx)}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveCopyMenuIdx(activeCopyMenuIdx === idx ? null : idx);
+                        }}
                         style={{
-                          background: copiedMsgIdx === idx ? '#f0fdf4' : '#ffffff',
-                          border: copiedMsgIdx === idx ? '1px solid #16a34a' : '1px solid #cbd5e1',
-                          color: copiedMsgIdx === idx ? '#16a34a' : '#475569',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          color: '#475569',
                           padding: '2px 8px',
                           fontSize: '10px',
                           fontWeight: '700',
@@ -903,14 +1135,97 @@ export default function SafePassageApp() {
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '3px',
-                          boxShadow: '1px 1px 0px #cbd5e1',
-                          transition: 'all 0.15s ease'
+                          boxShadow: '1px 1px 0px #cbd5e1'
                         }}
-                        title="Copy prompt + response"
+                        title="Copy options"
                       >
-                        {copiedMsgIdx === idx ? <Check size={9} /> : <Copy size={9} />}
-                        {copiedMsgIdx === idx ? t.copiedLabel : t.copyLabel}
+                        <Copy size={9} />
+                        <span>{t.copyLabel} ▾</span>
                       </button>
+
+                      {/* 3-Way Dropdown Menu */}
+                      {activeCopyMenuIdx === idx && (
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            [isRTL ? 'right' : 'left']: 0,
+                            marginTop: '4px',
+                            background: '#ffffff',
+                            border: '2px solid #000000',
+                            boxShadow: '3px 3px 0px #000000',
+                            zIndex: 250,
+                            minWidth: '160px',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => executeCopy('prompt', idx)}
+                            style={{
+                              padding: '7px 10px',
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              color: '#1e293b',
+                              background: '#ffffff',
+                              border: 'none',
+                              borderBottom: '1px solid #f1f5f9',
+                              textAlign: isRTL ? 'right' : 'left',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <MessageSquare size={11} style={{ color: '#6d28d9' }} />
+                            <span>{t.copyPromptLabel}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => executeCopy('reflection', idx)}
+                            style={{
+                              padding: '7px 10px',
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              color: '#1e293b',
+                              background: '#ffffff',
+                              border: 'none',
+                              borderBottom: '1px solid #f1f5f9',
+                              textAlign: isRTL ? 'right' : 'left',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <FileText size={11} style={{ color: '#6d28d9' }} />
+                            <span>{t.copyResponseLabel}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => executeCopy('both', idx)}
+                            style={{
+                              padding: '7px 10px',
+                              fontSize: '11px',
+                              fontWeight: '700',
+                              color: '#6d28d9',
+                              background: '#f5f3ff',
+                              border: 'none',
+                              textAlign: isRTL ? 'right' : 'left',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}
+                          >
+                            <Layers size={11} />
+                            <span>{t.copyBothLabel}</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -936,7 +1251,7 @@ export default function SafePassageApp() {
                 </div>
               ))}
 
-              {/* Relational AI Loading Awareness */}
+              {/* COMPUTATIONAL NETWORK LOADING AWARENESS (LOCALIZED & SPACED WITH . . .) */}
               {loading && (
                 <div style={{
                   alignSelf: isRTL ? 'flex-end' : 'flex-start',
@@ -953,15 +1268,15 @@ export default function SafePassageApp() {
                   boxShadow: '2px 2px 0px #4c1d95',
                   animation: 'pulse 1.5s infinite ease-in-out'
                 }}>
-                  <Database size={13} style={{ flexShrink: 0 }} />
-                  <span>{loadingPhrases[language][loadingPhraseIdx]}</span>
+                  <Cpu size={13} style={{ flexShrink: 0 }} />
+                  <span>{currentLoadingList[loadingPhraseIdx % currentLoadingList.length]}</span>
                 </div>
               )}
 
               <div ref={messagesEndRef} />
             </div>
 
-            {/* End Session Prompt — small grey box after AI responds */}
+            {/* End Session Prompt */}
             {messages.length >= 2 && !loading && (
               <div style={{
                 background: '#f8fafc',
@@ -996,7 +1311,7 @@ export default function SafePassageApp() {
               </div>
             )}
 
-            {/* Chat Input */}
+            {/* Chat Input (Original Pixel Font & Increased Size) */}
             <div style={{
               display: 'flex',
               gap: '6px',
@@ -1017,12 +1332,12 @@ export default function SafePassageApp() {
                   flex: 1,
                   background: isLimitReached ? '#f1f5f9' : '#ffffff',
                   border: '2px solid #000000',
-                  padding: '9px 12px',
-                  color: isLimitReached ? '#64748b' : '#000000',
-                  fontSize: '13px',
-                  fontFamily: 'inherit',
+                  padding: '10px 14px',
+                  color: '#000000',
+                  fontSize: '15px',
+                  fontFamily: 'var(--font-pixel)',
                   outline: 'none',
-                  cursor: isLimitReached ? 'not-allowed' : 'text'
+                  boxShadow: '2px 2px 0px #cbd5e1'
                 }}
               />
               <button
@@ -1031,11 +1346,11 @@ export default function SafePassageApp() {
                 style={{
                   background: inputStory.trim() && !isLimitReached ? '#6d28d9' : '#e2e8f0',
                   color: inputStory.trim() && !isLimitReached ? '#ffffff' : '#94a3b8',
-                  padding: '0 16px',
+                  fontWeight: '700',
+                  padding: '9px 14px',
                   border: inputStory.trim() && !isLimitReached ? '2px solid #6d28d9' : '2px solid #cbd5e1',
                   cursor: inputStory.trim() && !isLimitReached ? 'pointer' : 'not-allowed',
-                  fontWeight: '700',
-                  fontSize: '12px',
+                  fontSize: '13px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
@@ -1232,7 +1547,7 @@ export default function SafePassageApp() {
             <div style={{
               background: '#ffffff',
               border: '2px solid #000000',
-              maxWidth: '540px',
+              maxWidth: '560px',
               width: '100%',
               padding: '22px',
               boxShadow: '4px 4px 0px #000000',
@@ -1288,6 +1603,7 @@ export default function SafePassageApp() {
                 {t.sessionGovernanceNotice}
               </div>
 
+              {/* Regional Protocols Frame */}
               <div style={{ border: '1px solid #e2e8f0', padding: '12px', marginBottom: '14px', background: '#fafafa' }}>
                 <h4 style={{ fontSize: '11px', fontWeight: '700', marginBottom: '8px', marginTop: 0 }}>
                   {t.regionalFrameTitle}
@@ -1301,9 +1617,37 @@ export default function SafePassageApp() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#94a3b8' }}>
+              {/* Credits & Gratitude */}
+              <div style={{
+                borderTop: '1px solid #e2e8f0',
+                paddingTop: '14px',
+                marginTop: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                fontSize: '11.5px',
+                color: '#475569',
+                lineHeight: '1.5'
+              }}>
+                <div>
+                  <strong>Primary Contributor:</strong> Iretomiwa Sharon Omodeinde (
+                  <a
+                    href="https://instagram.com/2001collective"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#6d28d9', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: '600' }}
+                  >
+                    2001 Collective <ExternalLink size={10} />
+                  </a>
+                  )
+                </div>
+                <div style={{ color: '#64748b' }}>
+                  With gratitude to Ayomide Atobatele, Chinyere Obieze, Emeka Okereke, Dreaming New Worlds, and the source of all things.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', fontSize: '10px', color: '#94a3b8', marginTop: '14px' }}>
                 <span>Dreaming New Worlds 2026</span>
-                <span style={{ color: '#15803d', fontWeight: '600' }}>● Zero PII Civic Commons</span>
               </div>
             </div>
           </div>

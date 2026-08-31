@@ -36,6 +36,19 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Prompt inputs & placeholder typography */
+input,
+textarea {
+  font-family: var(--font-pixel);
+}
+
+input::placeholder,
+textarea::placeholder {
+  font-family: var(--font-pixel);
+  color: #94a3b8;
+  opacity: 1;
+}
+
 /* Retro Sharp Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

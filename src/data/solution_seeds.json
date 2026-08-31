@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "project": "A Safe Passage / ai-public",
-  "last_updated": "2026-08-25",
+  "last_updated": "2026-08-30",
   "description": "This file contains the core solution-oriented pathways, models, and paradigms developed for A Safe Passage. The conversational engine reads these seeds directly to guide deliberations, generate citizen-level protocols, and offer constructive ways of seeing and doing.",
   "core_philosophy": {
     "post_nationality": "An exit from the nation-first framework and an embrace of a human-first framework; that is, that we and the people we encounter are more than just nationals.",
@@ -61,6 +61,18 @@
       "category": "Industrial & Digital Sovereignty",
       "title": "Domiciling Semiconductor & Hardware Fabrication with STEM Incentives",
       "core_idea": "Continental digital policies (AfCFTA digital trade, data roaming harmonisation, and smart border technologies) cannot achieve genuine autonomy while Africa remains exclusively a consumer of foreign-fabricated electronic hardware. Realising digital sovereignty requires incentivising indigenous investors and technology builders to domicile transistor, microchip, and electronic hardware fabrication on the continent—even starting with specialised modular components. Crucially, this industrial base must be fueled by lowering barriers to entry for domestic hardware manufacturers and actively incentivising STEM, electronics, and micro-engineering education across African universities and vocational hubs."
+    },
+    {
+      "id": "pathway_10_sovereign_legal_audit_and_reciprocal_parity",
+      "category": "Corporate, Tax & Municipal Law",
+      "title": "Periodic Audits of National Corporate, Tax, and Penal Codes for Embedded Anti-African Bias",
+      "core_idea": "National statutes—including corporate incorporation laws, foreign national capital minimums, tax codes, and vagrancy/immigration laws—often embed protectionist or colonial-era traps that disproportionately penalize African nationals while offering incentives to foreign offshore capital. States and regional economic bodies must institute periodic audits of domestic corporate, tax, and criminal laws to systematically identify and dismantle embedded anti-African bias. Grounded in the principle of pan-African reciprocity, national policies should progressively lower the barrier of entry for African nationals and regional enterprises, recognizing a shared economic struggle and common historical destiny."
+    },
+    {
+      "id": "pathway_11_birthright_mobility_and_administrative_decentralization",
+      "category": "Civic Identity & Spatial Justice",
+      "title": "Decoupling Travel Rights from Centralized Passport Tollgates (Universal Birthright Mobility Credentials)",
+      "core_idea": "Freedom of movement is a fundamental human birthright, yet nation-states frequently turn passports into expensive, rationed privileges—trapping wealth and administrative authority in distant capital cities while extracting duplicate fees from citizens whose lives naturally traverse organic regional corridors. A passport is fundamentally an administrative verification; if biometric National IDs already authenticate identity, they must be recognized as universally sufficient for cross-border transit across the continent (as proven in the EAC). Transforming the state from a monopoly that sequesters rights and capital into an infrastructure that truly enables the human being requires decentralized, low-fee birthright travel credentials, reciprocal National ID recognition, and public relational memory that supersedes bureaucratic toll collection."
     }
   ]
 }

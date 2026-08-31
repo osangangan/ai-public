@@ -9,7 +9,7 @@ interface HubNode {
   y: number;
   size: number;
   importance: 'major' | 'medium' | 'minor';
-  rings: number[]; // concentric radii attached to this dot
+  rings: number[];
   driftAmpX: number;
   driftAmpY: number;
   phase: number;
@@ -18,8 +18,24 @@ interface HubNode {
   color: string;
 }
 
-export default function VectorFieldBackground() {
+interface SquidSprite {
+  active: boolean;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  angle: number;
+  targetAngle: number;
+  pulsePhase: number;
+}
+
+export default function VectorFieldBackground({ isProcessing = false }: { isProcessing?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isProcessingRef = useRef(isProcessing);
+
+  useEffect(() => {
+    isProcessingRef.current = isProcessing;
+  }, [isProcessing]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,25 +52,14 @@ export default function VectorFieldBackground() {
     const buildHubs = () => {
       hubs = [];
 
-      // Balanced distribution: some stationary anchor hubs, some migrating/drifting hubs
       const config = [
-        // 1. Major Center Anchor (Calm anchor in middle)
         { rx: 0.50, ry: 0.48, importance: 'major' as const, size: 4.8, ringCount: 6, spacing: 36, driftX: 6, driftY: 4, speed: 0.0008 },
-        // 2. Major Migrating Hub (Southwest drifting upward and rightward)
         { rx: 0.24, ry: 0.70, importance: 'major' as const, size: 4.2, ringCount: 5, spacing: 34, driftX: 65, driftY: 45, speed: 0.0016 },
-        // 3. Major Migrating Hub (Northeast drifting across quadrant)
         { rx: 0.76, ry: 0.30, importance: 'major' as const, size: 4.2, ringCount: 5, spacing: 34, driftX: 55, driftY: 50, speed: 0.0014 },
-
-        // 4. Medium Traveling Node (Northwest traveling toward center)
         { rx: 0.22, ry: 0.25, importance: 'medium' as const, size: 3.2, ringCount: 4, spacing: 30, driftX: 70, driftY: 35, speed: 0.0018 },
-        // 5. Medium Traveling Node (Southeast traveling upward)
         { rx: 0.75, ry: 0.75, importance: 'medium' as const, size: 3.2, ringCount: 4, spacing: 30, driftX: 60, driftY: 55, speed: 0.0015 },
-        // 6. Medium Anchor Node (South-Central)
         { rx: 0.50, ry: 0.85, importance: 'medium' as const, size: 3.0, ringCount: 4, spacing: 28, driftX: 8, driftY: 6, speed: 0.0010 },
-        // 7. Medium Anchor Node (North-Central)
         { rx: 0.48, ry: 0.16, importance: 'medium' as const, size: 3.0, ringCount: 4, spacing: 28, driftX: 10, driftY: 8, speed: 0.0011 },
-
-        // 8. Minor Migrating Nodes (Margin bridges & trade encounters)
         { rx: 0.10, ry: 0.48, importance: 'minor' as const, size: 2.0, ringCount: 3, spacing: 24, driftX: 45, driftY: 40, speed: 0.0020 },
         { rx: 0.90, ry: 0.52, importance: 'minor' as const, size: 2.0, ringCount: 3, spacing: 24, driftX: 45, driftY: 40, speed: 0.0019 },
         { rx: 0.36, ry: 0.44, importance: 'minor' as const, size: 2.2, ringCount: 3, spacing: 26, driftX: 55, driftY: 45, speed: 0.0022 },
@@ -93,6 +98,18 @@ export default function VectorFieldBackground() {
 
     buildHubs();
 
+    // ---- Retro Pixel Squid Easter Egg State (Continuous Ambient Swimming) -----
+    const squid: SquidSprite = {
+      active: false,
+      x: W * 0.5,
+      y: H * 0.5,
+      vx: 0.8,
+      vy: 0.4,
+      angle: 0,
+      targetAngle: 0,
+      pulsePhase: 0,
+    };
+
     const onResize = () => {
       W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
@@ -100,16 +117,15 @@ export default function VectorFieldBackground() {
     };
     window.addEventListener('resize', onResize);
 
-    // ---- Gentle Ambient Connecting Streamlines across Canvas ---------
+    // ---- Flow Vector Field -------------------------------------------
     const getFlowVector = (px: number, py: number, time: number) => {
       let fx = 0.28;
       let fy = Math.sin(py * 0.002 + time * 0.8) * 0.12;
 
-      // Soft, non-whirling rotational influence from hubs
       for (const h of hubs) {
         const dx = px - h.x;
         const dy = py - h.y;
-        const dist2 = dx * dx + dy * dy + 400; // larger soft core prevents violent center spinning
+        const dist2 = dx * dx + dy * dy + 400;
         const dist = Math.sqrt(dist2);
         const radius = Math.min(W, H) * (h.importance === 'major' ? 0.30 : 0.20);
         const factor = Math.exp(-dist2 / (radius * radius));
@@ -167,22 +183,102 @@ export default function VectorFieldBackground() {
       ctx.stroke();
     };
 
+    // ---- Draw Retro Pixel Squid Character (Continuous Ambient Swimming) -----
+    const drawSquid = (time: number) => {
+      if (!squid.active) return;
+
+      // Update Squid Physics & Motion
+      squid.pulsePhase += 0.08;
+      const speed = 0.9 + Math.sin(squid.pulsePhase) * 0.4;
+
+      // Gentle continuous organic steering across the whole canvas
+      if (Math.random() < 0.02) {
+        squid.targetAngle += (Math.random() - 0.5) * 1.1;
+      }
+      squid.angle += (squid.targetAngle - squid.angle) * 0.04;
+
+      squid.vx = Math.cos(squid.angle) * speed;
+      squid.vy = Math.sin(squid.angle) * speed;
+
+      squid.x += squid.vx;
+      squid.y += squid.vy;
+
+      // Screen wrapping (smooth continuous presence across and outside canvas)
+      if (squid.x < -40) squid.x = W + 30;
+      if (squid.x > W + 40) squid.x = -30;
+      if (squid.y < -40) squid.y = H + 30;
+      if (squid.y > H + 40) squid.y = -30;
+
+      ctx.save();
+      ctx.translate(squid.x, squid.y);
+      ctx.rotate(squid.angle + Math.PI / 2);
+
+      // Draw Retro Pixel / 8-Bit Squid (Scale ~ 1.5x)
+      const P = 2.2; // Pixel size
+      const mainColor = '#7c3aed';
+      const eyeWhite = '#ffffff';
+      const pupil = '#3b0764';
+      const tentacleColor = '#9333ea';
+
+      ctx.fillStyle = mainColor;
+
+      // 8-bit Bell / Dome shape
+      // Row 1 (Top cap)
+      ctx.fillRect(-2 * P, -6 * P, 4 * P, P);
+      // Row 2
+      ctx.fillRect(-3 * P, -5 * P, 6 * P, P);
+      // Row 3-4 (Main Body)
+      ctx.fillRect(-4 * P, -4 * P, 8 * P, 3 * P);
+      // Row 5 (Mantle base)
+      ctx.fillRect(-3 * P, -1 * P, 6 * P, P);
+
+      // Cute Pixel Eyes
+      ctx.fillStyle = eyeWhite;
+      ctx.fillRect(-3 * P, -4 * P, 2 * P, 2 * P);
+      ctx.fillRect(1 * P, -4 * P, 2 * P, 2 * P);
+      // Pupils
+      ctx.fillStyle = pupil;
+      ctx.fillRect(-2 * P, -3 * P, P, P);
+      ctx.fillRect(2 * P, -3 * P, P, P);
+
+      // Animated Undulating Tentacles
+      ctx.fillStyle = tentacleColor;
+      const tentacleWave1 = Math.sin(squid.pulsePhase * 1.5) * 1.8;
+      const tentacleWave2 = Math.cos(squid.pulsePhase * 1.5) * 1.8;
+
+      // Tentacle 1 (Left)
+      ctx.fillRect(-3 * P + tentacleWave1, 0, P, 3 * P);
+      // Tentacle 2 (Mid-Left)
+      ctx.fillRect(-1 * P + tentacleWave2, 0, P, 4 * P);
+      // Tentacle 3 (Mid-Right)
+      ctx.fillRect(1 * P - tentacleWave1, 0, P, 4 * P);
+      // Tentacle 4 (Right)
+      ctx.fillRect(3 * P - tentacleWave2, 0, P, 3 * P);
+
+      ctx.restore();
+    };
+
     let time = 0;
 
     const render = () => {
-      time += 0.009; // calm, dignified, perceptible flow rate
+      time += 0.009;
+
+      // Activate squid once prompt processing starts
+      if (isProcessingRef.current && !squid.active) {
+        squid.active = true;
+      }
 
       ctx.clearRect(0, 0, W, H);
       ctx.lineWidth = 1.05;
 
-      // 1. Move Traveling Dots & Anchors in their Orbits
+      // 1. Move Traveling Dots & Anchors
       for (const hub of hubs) {
         hub.phase += hub.phaseSpeed;
         hub.x = hub.baseX + Math.sin(hub.phase) * hub.driftAmpX;
         hub.y = hub.baseY + Math.cos(hub.phase * 0.85) * hub.driftAmpY;
       }
 
-      // 2. Draw Gentle Connecting Streamlines across Full Canvas
+      // 2. Draw Gentle Connecting Streamlines
       const seedSpacing = 38;
       const numLines = Math.floor(H / seedSpacing);
       for (let i = 0; i <= numLines; i++) {
@@ -195,15 +291,13 @@ export default function VectorFieldBackground() {
         traceStreamline(-10, y, time, color, i);
       }
 
-      // 3. Draw Concentric Wavy Circles Traveling WITH Each Moving Dot
-      // and merging dynamically when dots approach each other
+      // 3. Draw Concentric Wavy Circles Traveling with Moving Dots
       const NUM_RING_SEGMENTS = 72;
 
       for (let hIdx = 0; hIdx < hubs.length; hIdx++) {
         const hub = hubs[hIdx];
 
         hub.rings.forEach((baseRadius, rIdx) => {
-          // Dynamic breathing expansion
           const breath = Math.sin(time * 1.2 + hub.waveSeed + rIdx * 0.5) * 4;
           const effectiveRadius = baseRadius + breath;
 
@@ -217,17 +311,13 @@ export default function VectorFieldBackground() {
           for (let s = 0; s <= NUM_RING_SEGMENTS; s++) {
             const theta = (s / NUM_RING_SEGMENTS) * Math.PI * 2;
 
-            // Harmonic topographic wave on the concentric ring
             const wave1 = Math.sin(theta * 3 + time * 1.0 + hub.waveSeed) * (3.5 + rIdx * 1.1);
             const wave2 = Math.cos(theta * 5 - time * 0.8 + rIdx) * (2.0 + rIdx * 0.7);
             let r = effectiveRadius + wave1 + wave2;
 
-            // Point in space attached to the MOVING dot
             let px = hub.x + Math.cos(theta) * r;
             let py = hub.y + Math.sin(theta) * r;
 
-            // 4. Dynamic Merging: When concentric circles from two moving dots meet,
-            // they warp toward one another and merge into shared envelopes
             for (let otherIdx = 0; otherIdx < hubs.length; otherIdx++) {
               if (otherIdx === hIdx) continue;
               const other = hubs[otherIdx];
@@ -235,10 +325,8 @@ export default function VectorFieldBackground() {
               const oy = py - other.y;
               const oDist = Math.sqrt(ox * ox + oy * oy) + 1;
 
-              // Proximity threshold for circle-merging
               const mergeThreshold = other.rings[other.rings.length - 1] || 160;
               if (oDist < mergeThreshold) {
-                // Smooth bell-curve gravitational pull toward the companion node/ring
                 const pullFactor = Math.pow(1 - oDist / mergeThreshold, 2) * 16;
                 px -= (ox / oDist) * pullFactor;
                 py -= (oy / oDist) * pullFactor;
@@ -257,12 +345,11 @@ export default function VectorFieldBackground() {
         });
       }
 
-      // 5. Draw the Moving Dots (Variable sizes and halos)
+      // 4. Draw Center Settlement Hub Dots
       for (const hub of hubs) {
         const pulse = Math.sin(hub.phase * 2.5) * 0.6;
         const r = hub.size + pulse;
 
-        // Central Core Dot
         ctx.beginPath();
         ctx.arc(hub.x, hub.y, Math.max(1, r), 0, Math.PI * 2);
         ctx.fillStyle = hub.importance === 'major'
@@ -272,7 +359,6 @@ export default function VectorFieldBackground() {
           : 'rgba(30, 41, 59, 0.22)';
         ctx.fill();
 
-        // Radiating inner halo for major anchor hubs
         if (hub.importance === 'major') {
           ctx.beginPath();
           ctx.arc(hub.x, hub.y, r * 2.4, 0, Math.PI * 2);
@@ -281,6 +367,9 @@ export default function VectorFieldBackground() {
           ctx.stroke();
         }
       }
+
+      // 5. Render Retro Squid (Smooth continuous ambient swimming)
+      drawSquid(time);
 
       animId = requestAnimationFrame(render);
     };

@@ -1,64 +1,78 @@
 import { NextRequest, NextResponse } from 'next/server';
-import knowledgeBase from '@/data/knowledge_base_treaties_and_empirical.json';
+import solutionSeeds from '@/data/solution_seeds.json';
+import treatiesData from '@/data/knowledge_base_treaties_and_empirical.json';
 import relationalLensData from '@/data/relational_lens.json';
 
-// PII Scrubber
+// STRICT ZERO-PII SCRUBBING ENGINE
+// Strips names, phone numbers, passport numbers, email addresses, and vehicle plates
 function scrubPII(text: string): string {
   if (!text) return '';
   return text
-    .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[REDACTED_EMAIL]')
-    .replace(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4,6}/g, '[REDACTED_PHONE]')
-    .replace(/\b[A-Z]{1,2}[0-9]{7,9}\b/g, '[REDACTED_PASSPORT_NUMBER]');
+    // Names preceded by common prefixes
+    .replace(/(?:my name is|i am|i'm|this is|call me)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/gi, '[ANONYMISED TRAVELER]')
+    // Email addresses
+    .replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g, '[ANONYMISED EMAIL]')
+    // International / African phone numbers
+    .replace(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/g, '[ANONYMISED PHONE]')
+    // Passport & National ID numbers (standard alpha-numeric patterns)
+    .replace(/\b[A-Z]{1,2}[0-9]{7,9}\b/g, '[ANONYMISED PASSPORT/ID]')
+    .replace(/\b(?:NIN|BVN|ID|PASSPORT|CNI|DNI|PASS|DOC)\s*[:#-]?\s*[A-Z0-9-]{5,15}\b/gi, '[ANONYMISED ID]')
+    // Vehicle registration license plates
+    .replace(/\b(?:PLATE|REG|TAG)\s*[:#-]?\s*[A-Z0-9-]{5,10}\b/gi, '[ANONYMISED VEHICLE PLATE]');
 }
 
-// Extract lightweight contextual hints only if user conversation mentions specific domains
-function getDynamicContext(userText: string): string {
-  const lower = userText.toLowerCase();
-  const hints: string[] = [];
+// Build dynamic system instructions injecting verified treaties, relational lens, and solution pathways
+function buildSystemInstruction(language: string, userLastMessage: string): string {
+  const isFrench = language === 'fr';
+  const isSwahili = language === 'sw';
+  const isArabic = language === 'ar';
+  const isPortuguese = language === 'pt';
+  const isSpanish = language === 'es';
 
-  if (lower.includes('roam') || lower.includes('data') || lower.includes('internet') || lower.includes('sim') || lower.includes('phone') || lower.includes('network') || lower.includes('réseau') || lower.includes('itinérance') || lower.includes('mtandao') || lower.includes('انترنت') || lower.includes('اتصال') || lower.includes('dados') || lower.includes('roaming')) {
-    hints.push('• Connectivity & Roaming: High roaming fees act as a digital border tax. Frameworks like EAC/SADC One Network Area (ONA) prove cross-border flat-rate data is possible.');
+  let langInstruction = 'Respond strictly in English.';
+  if (isFrench) langInstruction = 'Répondez strictement en Français.';
+  if (isSwahili) langInstruction = 'Jibu kabisa kwa Kiswahili.';
+  if (isArabic) langInstruction = 'أجب حصرياً وبشكل دقيق باللغة العربية.';
+  if (isPortuguese) langInstruction = 'Responda estritamente em Português.';
+  if (isSpanish) langInstruction = 'Responde estrictamente en Español.';
+
+  // Contextual relevance matching for treaties & solutions
+  const queryLower = userLastMessage.toLowerCase();
+  let relevantTreaties = '';
+  let relevantSolutions = '';
+
+  if (queryLower.includes('ecowas') || queryLower.includes('west africa') || queryLower.includes('seme') || queryLower.includes('lagos') || queryLower.includes('cotonou') || queryLower.includes('ghana') || queryLower.includes('togo') || queryLower.includes('benin') || queryLower.includes('nigeria')) {
+    relevantTreaties += `\n- ECOWAS Protocols: 90-day visa-free entry (1979 Protocol A/P.1/5/79); 0% import duties on unprocessed agricultural goods & traditional crafts under ECOWAS Trade Liberalization Scheme (ETLS); Biometric ID Card adoption.`;
+  }
+  if (queryLower.includes('eac') || queryLower.includes('east africa') || queryLower.includes('kenya') || queryLower.includes('uganda') || queryLower.includes('tanzania') || queryLower.includes('rwanda') || queryLower.includes('namanga') || queryLower.includes('busia') || queryLower.includes('malaba')) {
+    relevantTreaties += `\n- EAC Common Market Protocol: Travel via National Identity Card (Kenya, Uganda, Rwanda); East Africa Tourist Visa (Kenya, Rwanda, Uganda); EAC One Network Area (ONA) harmonized cross-border telecom roaming rates without exorbitant roaming fees.`;
+  }
+  if (queryLower.includes('sadc') || queryLower.includes('southern africa') || queryLower.includes('zimbabwe') || queryLower.includes('south africa') || queryLower.includes('zambia') || queryLower.includes('beitbridge')) {
+    relevantTreaties += `\n- SADC Protocols: SADC Protocol on the Facilitation of Movement of Persons; SADC Simplified Trade Regime (STR) for small-scale traders; SADC Home and Away Roaming initiatives.`;
+  }
+  if (queryLower.includes('roam') || queryLower.includes('sim') || queryLower.includes('data') || queryLower.includes('network') || queryLower.includes('phone') || queryLower.includes('internet')) {
+    relevantSolutions += `\n- Digital Frontier Tax: Exorbitant data roaming is a barrier to mobility. Regional frameworks like EAC One Network Area (ONA) and SADC pacts prove flat-rate, local-cost cross-border connectivity is viable. Travelers have a right to uninterrupted digital access.`;
+  }
+  if (queryLower.includes('food') || queryLower.includes('goods') || queryLower.includes('produce') || queryLower.includes('trade') || queryLower.includes('market') || queryLower.includes('customs') || queryLower.includes('tariff') || queryLower.includes('duty') || queryLower.includes('etls') || queryLower.includes('str')) {
+    relevantSolutions += `\n- Simplified Trade Regimes & ETLS: Agricultural foodstuffs, artisan crafts, and small-scale trade goods enjoy 0% tariff protections under regional treaties (ECOWAS ETLS, COMESA STR, SADC STR). Checkpoints must not extract illegal customs duties on community produce.`;
   }
 
-  if (lower.includes('produce') || lower.includes('goods') || lower.includes('trade') || lower.includes('cargo') || lower.includes('custom') || lower.includes('douane') || lower.includes('marchandise') || lower.includes('farm') || lower.includes('harvest') || lower.includes('bidhaa') || lower.includes('biashara') || lower.includes('جمارك') || lower.includes('بضائع') || lower.includes('mercadoria') || lower.includes('alfândega')) {
-    hints.push('• Small Trade & Goods: Mechanisms like ECOWAS ETLS (0% agricultural tariffs) and COMESA/SADC Simplified Trade Regimes (STR) exist to protect everyday cross-border traders from arbitrary checkpoint extortion.');
-  }
+  const dynamicContext = `
+RELEVANT CODIFIED TREATIES & PROTOCOLS (USE ACCURATELY AS CODIFIED LAW):
+${relevantTreaties || '- Reference verified regional frameworks (ECOWAS ETLS 1979, EAC Common Market 2010, SADC Protocol, AfCFTA 2018, AU Free Movement Protocol) when relevant to the traveler\'s specific geography.'}
 
-  if (lower.includes('copyright') || lower.includes('music') || lower.includes('ip') || lower.includes('art') || lower.includes('software') || lower.includes('design') || lower.includes('brand') || lower.includes('propriété') || lower.includes('sanaa') || lower.includes('ابتكار') || lower.includes('ملكية') || lower.includes('marca') || lower.includes('autoral')) {
-    hints.push('• Intellectual Property: Africa is split between ARIPO, OAPI, and non-members like Nigeria/South Africa. While AfCFTA IPR Protocol binds states on paper, domestic registry backlogs leave creators exposed when crossing frontiers.');
-  }
+RELEVANT CITIZEN SOLUTION PATHWAYS:
+${relevantSolutions || '- Ground recommendations in practical citizen empowerment: knowing codified treaty rights, utilizing mutual insurance/trade regimes, and recognizing community intelligence as infrastructure.'}
+`;
 
-  if (lower.includes('flight') || lower.includes('transit') || lower.includes('airport') || lower.includes('bus') || lower.includes('luggage') || lower.includes('visa') || lower.includes('connection') || lower.includes('vol') || lower.includes('bagage') || lower.includes('safari') || lower.includes('ndege') || lower.includes('visa') || lower.includes('تأشيرة') || lower.includes('طيران') || lower.includes('عبور') || lower.includes('viagem') || lower.includes('visto')) {
-    hints.push('• Transit & Passage: Over-militarized checkpoints and lack of open skies (SAATM) create arbitrary bottlenecks. Formal transport operators often normalize extortion into travel fares.');
-  }
-
-  return hints.length > 0 ? `\nRELEVANT SYSTEM HINTS (use subtly if helpful, do not force):\n${hints.join('\n')}` : '';
-}
-
-function buildSystemInstruction(language: string, fullConversationText: string): string {
-  const dynamicContext = getDynamicContext(fullConversationText);
-  
-  let langInstruction = 'Respond in natural, grounded, conversational English.';
-  if (language === 'sw') {
-    langInstruction = 'Jibu kwa Kiswahili fasaha, cha asili, chenye heshima na hisia za kibinadamu — epuka maneno magumu ya kiteknolojia au jibu linalofanana na roboti.';
-  } else if (language === 'ar') {
-    langInstruction = 'أجب باللغة العربية الطبيعية، الدافئة، الإنسانية والواضحة — تجنب المصطلحات الآلية أو الأسلوب الجاف.';
-  } else if (language === 'pt') {
-    langInstruction = 'Responda em português natural, caloroso, fluído e humano — evite jargões acadêmicos rígidos ou tom robótico.';
-  } else if (language === 'fr') {
-    langInstruction = 'Réponds en français naturel, chaleureux, fluide et humain — évite les tournures académiques ou les formules de robot.';
-  } else if (language === 'es') {
-    langInstruction = 'Responde en español natural, cálido, fluido y humano — evita jergas académicas rígidas o tono robótico.';
-  }
-
-  return `You are a thoughtful conversational companion for "A Safe Passage" — a civic initiative exploring the lived reality of moving across African borders (with people, goods, and data).
+  return `You are A Safe Passage (AI Public), an interactive civic informatics and relational deliberation system developed by Iretomiwa Sharon Omodeinde within the Dreaming New Worlds 2026 programme.
 
 YOUR CORE ORIENTATION (THE RELATIONAL LENS):
 1. The Human Being Becomes the Border: Checkpoints are not just concrete; the border gets internalized into the ego, fears, authority, and conditioning of officials, transporters, and travelers. When friction happens, see the human being operating inside that system.
-2. The Border is a Site of Encounter: Frontiers are where languages, histories, and worlds collide. Transcendence comes from what we make of that encounter—practicing dignity, patience, and mutual recognition.
+2. The Border is a Site of Encounter: Frontiers are where languages, histories, and worlds collide. Transcendence comes from what we make of that encounter: practicing dignity, patience, and mutual recognition.
 3. Being With Each Other Must Be Learned: Stepping across colonial lines can feel like arriving on a new planet with no shared vocabulary. Pan-African kinship is an active practice of learning and unlearning, not an assumption.
 4. Transporters as Systemic Nodes: Recognize that commercial transport operators often normalize and institutionalize the bribery cycle as a cost of business.
-5. Pragmatic Optimism: Speak with grounded hope—rejecting both defeatist cynicism ("nothing works") and naive idealism ("we have no differences"). Humanizing borders is possible.
+5. Pragmatic Optimism: Speak with grounded hope, rejecting both defeatist cynicism ("nothing works") and naive idealism ("we have no differences"). Humanizing borders is possible.
 6. Post-Nationality: An exit from the nation-first framework to embrace a human-first framework; we are always more than just nationals.
 
 CONVERSATION & DIAGNOSTIC INTELLIGENCE:
@@ -84,7 +98,7 @@ async function callGemini(
   systemInstruction: string,
   apiKey: string
 ): Promise<string | null> {
-  const candidateModels = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+  const candidateModels = ['gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-flash-latest'];
   const sanitizedMessages = messages.map(m => ({
     role: m.role === 'user' ? 'user' : 'model',
     parts: [{ text: scrubPII(m.content) }]
@@ -98,33 +112,33 @@ async function callGemini(
         body: JSON.stringify({
           contents: sanitizedMessages,
           systemInstruction: { parts: [{ text: systemInstruction }] },
-          generationConfig: { 
-            temperature: 0.5, 
-            topP: 0.85, 
-            maxOutputTokens: 1200,
-            thinkingConfig: { thinkingBudget: 0 }
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 3500
           }
         })
       });
       if (res.ok) {
         const data = await res.json();
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text;
+        if (text && text.trim().length > 0) {
+          return text;
+        }
       }
-    } catch (e) {
-      console.warn('[Gemini] Model ' + model + ' failed:', e);
+    } catch {
+      // try next model
     }
   }
   return null;
 }
 
-// 2. Groq — SECONDARY / FAST FALLBACK
+// 2. Groq (Qwen 3.8 27B / GPT-OSS 120B) — SECONDARY HIGH-SPEED FALLBACK
 async function callGroq(
   messages: Array<{ role: string; content: string }>,
   systemInstruction: string,
   apiKey: string
 ): Promise<string | null> {
-  const candidateModels = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'groq/compound'];
+  const candidateModels = ['qwen/qwen3.8-27b', 'openai/gpt-oss-120b', 'groq/compound', 'openai/gpt-oss-20b'];
   const formattedMessages = [
     { role: 'system', content: systemInstruction },
     ...messages.map(m => ({
@@ -132,118 +146,74 @@ async function callGroq(
       content: scrubPII(m.content)
     }))
   ];
-
   for (const model of candidateModels) {
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
+        },
         body: JSON.stringify({
-          model: model,
+          model,
           messages: formattedMessages,
-          temperature: 0.5,
-          max_tokens: 1200
+          temperature: 0.7,
+          max_tokens: 2500
         })
       });
       if (res.ok) {
         const data = await res.json();
-        const content = data?.choices?.[0]?.message?.content;
-        if (content) return content;
+        const text = data?.choices?.[0]?.message?.content;
+        if (text && text.trim().length > 0) {
+          return text;
+        }
       }
-    } catch (e) {
-      console.warn(`[Groq] Model ${model} failed:`, e);
+    } catch {
+      // try next model
     }
-  }
-  return null;
-}
-
-// 3. OpenRouter — TERTIARY FALLBACK
-async function callOpenRouter(
-  messages: Array<{ role: string; content: string }>,
-  systemInstruction: string,
-  apiKey: string
-): Promise<string | null> {
-  try {
-    const formattedMessages = [
-      { role: 'system', content: systemInstruction },
-      ...messages.map(m => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: scrubPII(m.content)
-      }))
-    ];
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-      body: JSON.stringify({
-        model: 'meta-llama/llama-3.3-70b-instruct:free',
-        messages: formattedMessages,
-        temperature: 0.5,
-        max_tokens: 1200
-      })
-    });
-    if (res.ok) {
-      const data = await res.json();
-      return data?.choices?.[0]?.message?.content || null;
-    }
-  } catch (e) {
-    console.warn('[OpenRouter] Failed:', e);
   }
   return null;
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => null);
-    if (!body || !body.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
-      return NextResponse.json({ error: 'Messages array is required' }, { status: 400 });
+    const { messages, language = 'en' } = await req.json();
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return NextResponse.json({ error: 'No messages provided.' }, { status: 400 });
     }
 
-    const { messages, language = 'en' } = body;
-    const fullConversationText = messages.map((m: any) => m.content).join(' ');
-    const systemInstruction = buildSystemInstruction(language, fullConversationText);
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+    const systemInstruction = buildSystemInstruction(language, lastUserMsg);
 
-    const geminiKey = (process.env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '');
-    const groqKey = (process.env.GROQ_API_KEY || '').trim().replace(/^["']|["']$/g, '');
-    const openrouterKey = (process.env.OPENROUTER_API_KEY || '').trim().replace(/^["']|["']$/g, '');
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
 
-    let replyText: string | null = null;
-    let successfulProvider = '';
+    let reply: string | null = null;
+    let provider = '';
 
-    // 1. Gemini as Primary
+    // Primary: Google Gemini
     if (geminiKey) {
-      replyText = await callGemini(messages, systemInstruction, geminiKey);
-      if (replyText) successfulProvider = 'Gemini';
+      reply = await callGemini(messages, systemInstruction, geminiKey);
+      if (reply) provider = 'Gemini';
     }
 
-    // 2. Groq as Fallback
-    if (!replyText && groqKey) {
-      console.log('[Fallback] Trying Groq...');
-      replyText = await callGroq(messages, systemInstruction, groqKey);
-      if (replyText) successfulProvider = 'Groq';
+    // Fallback: Groq Qwen / GPT-OSS
+    if (!reply && groqKey) {
+      reply = await callGroq(messages, systemInstruction, groqKey);
+      if (reply) provider = 'Groq (Qwen-3.8-27b)';
     }
 
-    // 3. OpenRouter as Tertiary Fallback
-    if (!replyText && openrouterKey) {
-      console.log('[Fallback] Trying OpenRouter...');
-      replyText = await callOpenRouter(messages, systemInstruction, openrouterKey);
-      if (replyText) successfulProvider = 'OpenRouter';
-    }
-
-    if (!replyText) {
+    if (!reply) {
       return NextResponse.json(
-        { error: 'All AI providers are currently unavailable. Please try again shortly.' },
-        { status: 502 }
+        { error: 'All AI provider endpoints are temporarily unavailable. Please try again shortly.' },
+        { status: 503 }
       );
     }
 
-    console.log('[SafePassage] Response via ' + successfulProvider + ' (' + language + ')');
-    return NextResponse.json({ reply: replyText, language, provider: successfulProvider });
-
-  } catch (error: any) {
-    console.error('[SafePassage Route Error]:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error', details: error?.message || String(error) },
-      { status: 500 }
-    );
+    return NextResponse.json({ reply, provider });
+  } catch (error) {
+    console.error('Chat API Error:', error);
+    return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
   }
 }
